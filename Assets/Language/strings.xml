@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<languages>
+    <English>
+        <string name="highscore">HIGHSCORE</string>
+        <string name="last_score">LAST SCORE</string>
+        <string name="ranking">RANKING</string>
+        <string name="pause">PAUSE</string>
+        <string name="controls">CONTROLS</string>
+        <string name="sounds">SOUNDS</string>
+        <string name="settings">SETTINGS</string>
+        <string name="color">COLOR</string>
+        <string name="language">LANGUAGE</string>
+        <string name="share_score">SHARE SCORE</string>
+    </English>
+
+    <German>
+        <string name="highscore">HIGHSCORE</string>
+        <string name="last_score">LETZTE PUNKTE</string>
+        <string name="ranking">RANG</string>
+        <string name="pause">PAUSE</string>
+        <string name="controls">KONTROLLEN</string>
+        <string name="sounds">GERÄUSCHE</string>
+        <string name="settings">DIE EINSTELLUNGEN</string>
+        <string name="color">FARBE</string>
+        <string name="language">SPRACHE</string>
+        <string name="share_score">SHARE SCORE</string>
+    </German>
+
+</languages>
