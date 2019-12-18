@@ -6,8 +6,8 @@ namespace Managers
 {
     public class LanguageManager
     {
-        private  Hashtable strings;
-        private static readonly string path = $"{Application.dataPath}/Language/strings.xml";
+        private Hashtable strings;
+        private TextAsset textAsset = (TextAsset) Resources.Load("strings", typeof(TextAsset));
         private static LanguageManager instance;
 
         public static LanguageManager Instance()
@@ -19,7 +19,7 @@ namespace Managers
         public void SetLanguage(string language)
         {
             XmlDocument xml = new XmlDocument();
-            xml.Load(path);
+            xml.LoadXml(textAsset.text);
 
             strings = new Hashtable();
             XmlElement element = xml.DocumentElement[language];

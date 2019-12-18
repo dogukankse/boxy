@@ -13,6 +13,7 @@ namespace Managers
         {
             using (FileStream fs = File.Open(path, FileMode.OpenOrCreate))
             {
+                fs.SetLength(0);
                 string json = JsonUtility.ToJson(gameData);
                 byte[] info = new UTF8Encoding(true).GetBytes(json);
                 fs.Write(info, 0, info.Length);

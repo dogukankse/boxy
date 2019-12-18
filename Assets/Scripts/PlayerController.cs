@@ -2,13 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using Data;
+using DG.Tweening;
+using Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     private Slider slider;
-    [SerializeField] private float speed = 10f;
     [SerializeField] private GameObject player;
     private float dir = 1;
 
@@ -30,13 +31,14 @@ public class PlayerController : MonoBehaviour
             if (touch.phase == TouchPhase.Began)
                 dir *= -1;
         }
-
+#if UNITY_EDITOR
         //pc controller for test
         if (Input.GetMouseButtonDown(0))
         {
             dir *= -1;
         }
-
-        slider.value += .1f * speed * dir * Time.smoothDeltaTime;
+#endif
+        if (GameData.Instance().gameState == State.PLAYING)
+            slider.value += .1f * GameData.Instance().playerSpeed * dir * Time.smoothDeltaTime;
     }
 }

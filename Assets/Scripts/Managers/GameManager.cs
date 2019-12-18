@@ -1,33 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Data;
+﻿using Data;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
-
-enum States
-{
-    START_PLAYING,
-    PLAYING,
-    PAUSE,
-    EXIT_PLAYING
-}
 
 namespace Managers
 {
     public class GameManager : MonoBehaviour
     {
-        [SerializeField] private RectTransform bornLeft;
-        [SerializeField] private RectTransform bornRight;
-        [SerializeField] private RectTransform die;
-
         [SerializeField] private GameObject canvas;
-
+        [SerializeField] private RectTransform player;
         [SerializeField] private GameObject point;
         [SerializeField] private GameObject obstacle;
-        [SerializeField] public PlayerCollider player;
+        [SerializeField] public PlayerCollider playerCollider;
         [SerializeField] private Text scoreText;
 
         public UnityAction UpdeteUI;
@@ -36,35 +21,50 @@ namespace Managers
         private float bornLeftX;
         private float bornRightX;
         private float bornY;
+        private float endLeftX;
+        private float endRightX;
+        private float endY;
         private float dieY;
+
+        private float startPosX;
+        private Vector3 endPos;
 
         private int callID;
 
+
         private void Awake()
         {
-            bornLeftX = bornLeft.anchoredPosition.x;
-            bornRightX = bornRight.anchoredPosition.x;
-            bornY = bornLeft.anchoredPosition.y;
-            dieY = die.anchoredPosition.y;
-            SendGameManager();
+            bornLeftX = (Screen.width / -2f);
+            bornRightX = (Screen.width / 2f);
+            bornY = (Screen.height / 2f) + 100;
+
+            endLeftX = (Screen.width / -3f);
+            endRightX = (Screen.width / 3f);
+            endY = (Screen.height / -2f) * .6f;
+
+            dieY = (Screen.height / -2f) - 100;
+            float w = (Screen.width * 292f) / 375f;
+            float h = w / 13.27f;
+            player.sizeDelta = new Vector2(w, h);
+            player.anchoredPosition = new Vector2(0, endY);
         }
 
-        private GameManager SendGameManager()
-        {
-            return this;
-        }
 
         private void Start()
         {
-            callID = LeanTween.delayedCall(GameData.Instance().bornDelay, CreateCube).setRepeat(-1).id;
+            Sequence tweenSequence = DOTween.Sequence();
+            callID = 1;
+            tweenSequence.PrependCallback(CreateCube).PrependInterval(GameData.Instance().bornDelay)
+                .SetLoops(-1).SetId(callID);
         }
 
 
         void CreateCube()
         {
             GameObject cube;
-            float startPosX = Random.Range(bornLeftX, bornRightX);
-            //float toX = Random.Range(dieLeftX, dieRightX);
+            startPosX = Random.Range(bornLeftX, bornRightX);
+            float endPosX = Random.Range(endLeftX, endRightX);
+            endPos = new Vector3(endPosX, endY, 0);
             if (Random.Range(0f, 1f) <= GameData.Instance().pointRatio)
                 cube = Instantiate(obstacle, canvas.transform, true);
             else
@@ -75,18 +75,18 @@ namespace Managers
 
 
             RectTransform rectTransform = cube.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector3(startPosX, bornY, 0);
+            rectTransform.anchoredPosition = new Vector2(startPosX, bornY);
 
-            LeanTween.move(rectTransform, new Vector3(startPosX, dieY, 0), GameData.Instance().speed)
-                .setOnComplete(() => { Destroy(cube); });
-            //LeanTween.move(cube.GetComponent<RectTransform>(), new Vector3(toX, dieY, 0), 1f).setOnComplete(() => Destroy(cube));
+            rectTransform.DOAnchorPos(new Vector2(startPosX, dieY), GameData.Instance().speed).SetEase(Ease.InSine)
+                .OnComplete(() => Destroy(cube));
         }
+
 
         private void OnDestroy()
         {
             print("gameManager on destroy");
-            LeanTween.cancel(callID);
-            GameData.Instance().lastScore = player.Score;
+            DOTween.Kill(callID);
+            GameData.Instance().lastScore = playerCollider.Score;
             if (GameData.Instance().lastScore > GameData.Instance().highScore)
                 GameData.Instance().highScore = GameData.Instance().lastScore;
             UpdeteUI();

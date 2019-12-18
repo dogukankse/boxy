@@ -6,18 +6,18 @@ public class GameData
 
     public static GameData Instance()
     {
-        if (instance == null)
-        {
-            instance = SaveManager.IsSaveExists() ? SaveManager.Load() : new GameData();
-        }
-
-        return instance;
+        return instance ?? (instance = SaveManager.IsSaveExists() ? SaveManager.Load() : new GameData());
     }
 
     private GameData()
     {
     }
 
+    #region GameState
+
+    public State gameState;
+
+    #endregion
 
     #region Scores
 
@@ -40,6 +40,7 @@ public class GameData
     public float bornDelay = .5f;
     public float speed = 2f;
     public float pointRatio = .8f;
+    public float playerSpeed = 1f;
 
     #endregion
 }

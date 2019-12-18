@@ -8,6 +8,7 @@ using UnityEngine.Events;
 public class PlayerCollider : MonoBehaviour
 {
     public Action<int> UpdateScore;
+    public Action GameOver;
 
     public int Score { get; private set; }
 
@@ -20,9 +21,10 @@ public class PlayerCollider : MonoBehaviour
             Destroy(other.gameObject);
             UpdateScore(Score);
         }
-        else
+        else if (other.CompareTag("Obstacle"))
         {
             print("game over");
+            GameOver();
         }
     }
 }

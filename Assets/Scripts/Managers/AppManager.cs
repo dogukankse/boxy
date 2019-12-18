@@ -1,41 +1,55 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI.Extensions;
 
 namespace Managers
 {
+    public enum State
+    {
+        START_PLAYING,
+        PLAYING,
+        PAUSE,
+        EXIT_PLAYING,
+        MAIN_MENU
+    }
+
     public class AppManager : MonoBehaviour
     {
-        [SerializeField] private GameObject mainMenu;
-        [SerializeField] private GameObject pauseMenu;
-        [SerializeField] private GameObject settingsMenu;
-        [SerializeField] private GameObject shopMenu;
         [SerializeField] private GameObject gameScreen;
-
         [SerializeField] private UIManager uiManager;
         [SerializeField] private GameManager gameManager;
 
+        private State gameState;
         private GameObject game;
 
         private void Awake()
         {
             LanguageManager.Instance().SetLanguage("English");
+            GameData.Instance().gameState = State.MAIN_MENU;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            //uiManager.CreateGameWindow = CreateGame;
             uiManager.SetTexts();
             uiManager.CreateGameWindow = CreateGame;
+            uiManager.DestroyGame = DestroyGame;
         }
 
-
-        private GameObject CreateGame(GameObject canvas)
+        private void CreateGame(GameObject canvas)
         {
+            Debug.Log("CreateGame girdi");
             game = Instantiate(gameScreen, canvas.transform, false);
             StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
             gameManager = game.GetComponentInChildren<GameManager>();
-            
+            GameData.Instance().gameState = State.PLAYING;
             uiManager.SetScoreText(gameManager.GetScoreText());
-            gameManager.player.UpdateScore = uiManager.SetScore;
+            gameManager.playerCollider.UpdateScore = uiManager.SetScore;
+            gameManager.playerCollider.GameOver = uiManager.GameOver;
             gameManager.UpdeteUI = uiManager.UpdateUI;
-            return game;
+            uiManager.game = game;
+            uiManager.explotion = game.GetComponentInChildren<UIParticleSystem>();
+        }
+
+        private void DestroyGame()
+        {
+            Destroy(game);
         }
 
         private void OnDestroy()
