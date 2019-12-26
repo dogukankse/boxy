@@ -1,4 +1,6 @@
-﻿using Managers;
+﻿using Data;
+using Managers;
+using UnityEngine;
 
 public class GameData
 {
@@ -7,6 +9,11 @@ public class GameData
     public static GameData Instance()
     {
         return instance ?? (instance = SaveManager.IsSaveExists() ? SaveManager.Load() : new GameData());
+    }
+
+    public static void SetGameData(GameData gameData)
+    {
+        instance = gameData;
     }
 
     private GameData()
@@ -23,7 +30,6 @@ public class GameData
 
     public int highScore;
     public int lastScore;
-    public int score;
 
     #endregion
 
@@ -38,9 +44,12 @@ public class GameData
     #region Settings
 
     public float bornDelay = .5f;
-    public float speed = 2f;
-    public float pointRatio = .8f;
-    public float playerSpeed = 1f;
+    public float objectSpeed = 2f;
+    public float pointBornRatio = .8f;
+    public float playerSpeed = 10f;
 
     #endregion
+
+    public Color color = ColorData.InitialColor();
+    public float mainCanvasHeight;
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Coffee.UIExtensions;
 using Data;
 using DG.Tweening;
 using UnityEngine;
@@ -24,10 +25,12 @@ namespace Managers
         [SerializeField] private GameObject settingsButton;
         [SerializeField] private GameObject shopButton;
         [SerializeField] private GameObject pauseButton;
+        [SerializeField] private GameObject rankingButton;
+        [SerializeField] private GameObject frame;
         [SerializeField] private Text lastScoreText;
         [SerializeField] private Text rankingText;
         [SerializeField] private Text lastScore;
-        [SerializeField] private Text highscore;
+        [SerializeField] private Text highScore;
         [SerializeField] private Text magnetCount;
         [SerializeField] private Text slowCount;
         [SerializeField] private Text bombCount;
@@ -39,16 +42,18 @@ namespace Managers
         [Space(10)] [Header("Settings UI")] [SerializeField]
         private GameObject settingsMenu;
 
+        [SerializeField] private Image colorPreview;
+
         [Space(10)] [Header("Pause UI")] [SerializeField]
         private GameObject pauseMenu;
 
-        [Space(10)] [Header("Temp UI")] [SerializeField]
-        private GameObject tempSettings;
+        [Space(10)] [Header("Temp UI")] public GameObject tempSettings;
+        public GameObject tempPanel;
 
         [Space(10)] [SerializeField] private Text highscoreText;
 
         [SerializeField] private Text scoreText;
-        public UIParticleSystem explotion;
+        public ParticleSystem explotion;
 
 
         public GameObject game;
@@ -56,10 +61,16 @@ namespace Managers
 
         public UnityAction<GameObject> CreateGameWindow;
         public UnityAction DestroyGame;
+        public UnityAction Magnet;
 
         private void Start()
         {
             UpdateUI();
+            RectTransform rt = frame.GetComponent<RectTransform>();
+            GameData.Instance().mainCanvasHeight = canvas.GetComponent<RectTransform>().rect.size.y;
+            rt.offsetMin = new Vector2(rt.offsetMin.x, GetBannerHeight());
+            colorPreview.color = GameData.Instance().color;
+
             currScreen = mainMenu;
         }
 
@@ -74,8 +85,13 @@ namespace Managers
                     mainMenu.SetActive(true);
                     GameData.Instance().gameState = State.MAIN_MENU;
                 }
-                else if (currScreen == mainMenu)
-                    Application.Quit();
+                else if (currScreen == tempPanel)
+                {
+                    mainMenu.SetActive(true);
+                    tempPanel.SetActive(false);
+                    currScreen = mainMenu;
+                    UpdateUI();
+                }
                 else
                 {
                     currScreen.SetActive(false);
@@ -94,21 +110,21 @@ namespace Managers
             pauseButton.SetActive(true);
             try
             {
-                CreateGameWindow(canvas);
-
+                CreateGameWindow(frame);
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
                 Debug.LogError("Create Game Windows probabliy null");
             }
+
             if (game == null) throw new Exception("uiManager game is null");
             game.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
             background.sprite = gameBg;
-            explotion.color = ColorData.orange;
+            ParticleSystem.MainModule main = explotion.main;
+            main.startColor = GameData.Instance().color;
         }
-
-
+        
         public void OnSettingsButtonClick()
         {
             currScreen.SetActive(false);
@@ -151,13 +167,19 @@ namespace Managers
         {
             print("updateUI");
 
-            highscore.text = "" + GameData.Instance().highScore;
+            highScore.text = "" + GameData.Instance().highScore;
             lastScore.text = "" + GameData.Instance().lastScore;
             magnetCount.text = "" + GameData.Instance().magnetBoosterCount;
             slowCount.text = "" + GameData.Instance().slowBoosterCount;
             bombCount.text = "" + GameData.Instance().bombBoosterCount;
         }
-
+        
+        private float GetBannerHeight()
+        {
+            float height = Mathf.RoundToInt(50 * Screen.dpi / 160);
+            float margin = height / 4;
+            return height + margin;
+        }
 
         public void SetTexts()
         {
@@ -172,6 +194,11 @@ namespace Managers
             this.scoreText = scoreText;
         }
 
+        public void ChangeColor()
+        {
+            ColorData.NextColor();
+            colorPreview.color = GameData.Instance().color;
+        }
 
         public void SetScore(int score)
         {
@@ -195,9 +222,37 @@ namespace Managers
                     currScreen = mainMenu;
                     GameData.Instance().gameState = State.MAIN_MENU;
                     mainMenu.SetActive(true);
+                    settingsButton.SetActive(true);
+                    shopButton.SetActive(true);
+                    pauseButton.SetActive(false);
                     sequence.Kill();
                     background.sprite = bg;
                 });
+        }
+
+        //temp
+        public void temp()
+        {
+            settingsMenu.SetActive(false);
+            tempPanel.SetActive(true);
+            currScreen = tempPanel;
+        }
+
+        public void MagnetPower()
+        {
+            GameData.Instance().magnetBoosterCount--;
+            Magnet();
+            UpdateUI();
+        }
+
+        public void SlowPower()
+        {
+            
+        }
+
+        public void BombPower()
+        {
+            
         }
     }
 }

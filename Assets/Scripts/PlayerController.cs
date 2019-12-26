@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         slider = GetComponent<Slider>();
-        player.GetComponent<Image>().color = ColorData.orange;
+        player.GetComponent<Image>().color = GameData.Instance().color;
     }
 
     private void Update()
@@ -39,6 +39,6 @@ public class PlayerController : MonoBehaviour
         }
 #endif
         if (GameData.Instance().gameState == State.PLAYING)
-            slider.value += .1f * GameData.Instance().playerSpeed * dir * Time.smoothDeltaTime;
+            slider.value += .1f * GameData.Instance().playerSpeed * dir * Time.deltaTime;
     }
 }

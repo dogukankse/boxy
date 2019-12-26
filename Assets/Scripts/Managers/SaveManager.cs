@@ -9,12 +9,12 @@ namespace Managers
     {
         private static string path = $"{Application.persistentDataPath}/save.json";
 
-        public static void Save(GameData gameData)
+        public static void Save()
         {
             using (FileStream fs = File.Open(path, FileMode.OpenOrCreate))
             {
                 fs.SetLength(0);
-                string json = JsonUtility.ToJson(gameData);
+                string json = JsonUtility.ToJson(GameData.Instance());
                 byte[] info = new UTF8Encoding(true).GetBytes(json);
                 fs.Write(info, 0, info.Length);
                 Debug.Log("Saved");

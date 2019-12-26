@@ -1,4 +1,5 @@
 using System;
+using Coffee.UIExtensions;
 using UnityEngine;
 using UnityEngine.UI.Extensions;
 
@@ -32,10 +33,10 @@ namespace Managers
             uiManager.DestroyGame = DestroyGame;
         }
 
-        private void CreateGame(GameObject canvas)
+        private void CreateGame(GameObject frame)
         {
             Debug.Log("CreateGame girdi");
-            game = Instantiate(gameScreen, canvas.transform, false);
+            game = Instantiate(gameScreen, frame.transform, false);
             StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
             gameManager = game.GetComponentInChildren<GameManager>();
             GameData.Instance().gameState = State.PLAYING;
@@ -43,8 +44,13 @@ namespace Managers
             gameManager.playerCollider.UpdateScore = uiManager.SetScore;
             gameManager.playerCollider.GameOver = uiManager.GameOver;
             gameManager.UpdeteUI = uiManager.UpdateUI;
+            uiManager.Magnet = gameManager.Magnet;
+
+            gameManager.magnet.onClick.AddListener(uiManager.MagnetPower);
+
+
             uiManager.game = game;
-            uiManager.explotion = game.GetComponentInChildren<UIParticleSystem>();
+            uiManager.explotion = game.GetComponentInChildren<ParticleSystem>();
         }
 
         private void DestroyGame()
@@ -54,7 +60,7 @@ namespace Managers
 
         private void OnDestroy()
         {
-            SaveManager.Save(GameData.Instance());
+            SaveManager.Save();
             print("appmanager on destroy");
         }
     }

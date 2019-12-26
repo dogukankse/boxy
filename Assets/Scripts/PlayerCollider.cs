@@ -27,4 +27,9 @@ public class PlayerCollider : MonoBehaviour
             GameOver();
         }
     }
+
+    public Vector2 GetAnchorPos()
+    {
+        return this.GetComponent<RectTransform>().anchoredPosition;
+    }
 }
