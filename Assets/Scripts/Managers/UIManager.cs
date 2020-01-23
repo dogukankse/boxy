@@ -1,12 +1,11 @@
 ﻿using System;
-using Coffee.UIExtensions;
 using Data;
 using DG.Tweening;
+using EasyMobile;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Networking;
+using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
-using UnityEngine.UI.Extensions;
 
 namespace Managers
 {
@@ -21,10 +20,12 @@ namespace Managers
         [Space(10)] [Header("MainMenu UI")] [SerializeField]
         private GameObject canvas;
 
+        [SerializeField] private Text username;
         [SerializeField] private GameObject mainMenu;
         [SerializeField] private GameObject settingsButton;
         [SerializeField] private GameObject shopButton;
         [SerializeField] private GameObject pauseButton;
+        [SerializeField] private GameObject backButton;
         [SerializeField] private GameObject rankingButton;
         [SerializeField] private GameObject frame;
         [SerializeField] private Text lastScoreText;
@@ -50,6 +51,16 @@ namespace Managers
         [Space(10)] [Header("Temp UI")] public GameObject tempSettings;
         public GameObject tempPanel;
 
+        [Space(10)] [Header("Rankings")] [SerializeField]
+        private GameObject rankingsScreen;
+
+        [Space(10)] [Header("Boosters")] [SerializeField]
+        private Button magnetBooster;
+
+        [SerializeField] private Button slowBooster;
+        [SerializeField] private Button bombBooster;
+
+
         [Space(10)] [SerializeField] private Text highscoreText;
 
         [SerializeField] private Text scoreText;
@@ -62,12 +73,13 @@ namespace Managers
         public UnityAction<GameObject> CreateGameWindow;
         public UnityAction DestroyGame;
         public UnityAction Magnet;
+        public UnityAction Slow;
+        public UnityAction Bomb;
 
         private void Start()
         {
             UpdateUI();
             RectTransform rt = frame.GetComponent<RectTransform>();
-            GameData.Instance().mainCanvasHeight = canvas.GetComponent<RectTransform>().rect.size.y;
             rt.offsetMin = new Vector2(rt.offsetMin.x, GetBannerHeight());
             colorPreview.color = GameData.Instance().color;
 
@@ -78,11 +90,15 @@ namespace Managers
         {
             if (Input.GetKey(KeyCode.Escape))
             {
-                if (GameData.Instance().gameState == State.PLAYING)
+                /*if (GameData.Instance().gameState == State.PLAYING)
                 {
                     DestroyGame();
                     currScreen = mainMenu;
                     mainMenu.SetActive(true);
+                    background.sprite = bg;
+                    pauseButton.SetActive(false);
+                    settingsButton.SetActive(true);
+                    shopButton.SetActive(true);
                     GameData.Instance().gameState = State.MAIN_MENU;
                 }
                 else if (currScreen == tempPanel)
@@ -92,18 +108,32 @@ namespace Managers
                     currScreen = mainMenu;
                     UpdateUI();
                 }
+                else if (GameData.Instance().gameState == State.PAUSE)
+                {
+                    Sequence sequence = DOTween.Sequence();
+                    sequence.PrependInterval(3).OnComplete(() =>
+                    {
+                        DOTween.TogglePauseAll();
+                        GameData.Instance().gameState = State.PLAYING;
+                        game.SetActive(true);
+                        pauseMenu.SetActive(false);
+                        sequence.Kill();
+                    });
+                }
                 else
                 {
                     currScreen.SetActive(false);
                     currScreen = mainMenu;
                     mainMenu.SetActive(true);
                     GameData.Instance().gameState = State.MAIN_MENU;
-                }
+                }*/
+                StateChange();
             }
         }
 
-        public void PlayButtonListener()
+        public void OnPlayButtonClick()
         {
+            GameData.Instance().gameState = State.PLAYING;
             mainMenu.SetActive(false);
             settingsButton.SetActive(false);
             shopButton.SetActive(false);
@@ -124,12 +154,32 @@ namespace Managers
             ParticleSystem.MainModule main = explotion.main;
             main.startColor = GameData.Instance().color;
         }
-        
+
+
+        public void OnShareButtonClick()
+        {
+            GameData.Instance().gameState = State.RANKINGS;
+            mainMenu.SetActive(false);
+            settingsButton.SetActive(false);
+            shopButton.SetActive(false);
+            rankingsScreen.SetActive(true);
+        }
+
+        public void OnRankingButtonClick()
+        {
+            if (GameServices.IsInitialized())
+                GameServices.ShowLeaderboardUI();
+        }
+
         public void OnSettingsButtonClick()
         {
-            currScreen.SetActive(false);
+            GameData.Instance().gameState = State.SETTINGS;
+            mainMenu.SetActive(false);
             currScreen = settingsMenu;
             settingsMenu.SetActive(true);
+            settingsButton.SetActive(false);
+            shopButton.SetActive(false);
+            backButton.SetActive(true);
         }
 
         public void OnPauseButtonClick()
@@ -139,41 +189,110 @@ namespace Managers
                 GameData.Instance().gameState = State.PAUSE;
                 pauseMenu.SetActive(true);
                 DOTween.TogglePauseAll();
-
+                pauseButton.SetActive(false);
                 game.SetActive(false);
             }
-            else if (GameData.Instance().gameState == State.PAUSE)
+        }
+
+        public void OnResumeButtonClick()
+        {
+            Sequence sequence = DOTween.Sequence();
+            sequence.PrependInterval(3).OnComplete(() =>
             {
-                Sequence sequence = DOTween.Sequence();
-                sequence.PrependInterval(3).OnComplete(() =>
-                {
-                    DOTween.TogglePauseAll();
-                    GameData.Instance().gameState = State.PLAYING;
-                    game.SetActive(true);
-                    pauseMenu.SetActive(false);
-                    sequence.Kill();
-                });
-            }
+                DOTween.TogglePauseAll();
+                GameData.Instance().gameState = State.PLAYING;
+                game.SetActive(true);
+                pauseMenu.SetActive(false);
+                pauseButton.SetActive(true);
+                sequence.Kill();
+            });
         }
 
         public void OnShopButtonClick()
         {
-            currScreen.SetActive(false);
+            GameData.Instance().gameState = State.SHOP;
+            mainMenu.SetActive(false);
             currScreen = shopMenu;
             shopMenu.SetActive(true);
+            settingsButton.SetActive(false);
+            shopButton.SetActive(false);
+            backButton.SetActive(true);
+            AdsManager.Instance().HideBanner();
+        }
+
+        public void OnBackButtonClick()
+        {
+            StateChange();
+        }
+
+        private void StateChange()
+        {
+            switch (GameData.Instance().gameState)
+            {
+                case State.PAUSE:
+                    OnResumeButtonClick();
+                    break;
+                case State.SETTINGS:
+                    settingsMenu.SetActive(false);
+                    mainMenu.SetActive(true);
+                    backButton.SetActive(false);
+                    shopButton.SetActive(true);
+                    settingsButton.SetActive(true);
+                    GameData.Instance().gameState = State.MAIN_MENU;
+                    break;
+                case State.SHOP:
+                    shopMenu.SetActive(false);
+                    mainMenu.SetActive(true);
+                    backButton.SetActive(false);
+                    shopButton.SetActive(true);
+                    settingsButton.SetActive(true);
+                    GameData.Instance().gameState = State.MAIN_MENU;
+                    StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
+                    break;
+                case State.PLAYING:
+                    DestroyGame();
+                    currScreen = mainMenu;
+                    mainMenu.SetActive(true);
+                    background.sprite = bg;
+                    pauseButton.SetActive(false);
+                    settingsButton.SetActive(true);
+                    shopButton.SetActive(true);
+                    GameData.Instance().gameState = State.MAIN_MENU;
+                    break;
+            }
         }
 
         public void UpdateUI()
         {
             print("updateUI");
+            if (GameServices.IsInitialized())
+            {
+                username.text = GameServices.LocalUser.userName;
+                GameServices.LoadLocalUserScore(EM_GameServicesConstants.Leaderboard_Rakings,
+                    (string leaderboardName, IScore score) =>
+                    {
+                        if (score != null)
+                        {
+                            highScore.text = score.value + "";
+                            Debug.Log("Score: " + score.value + "leaderboard: " + leaderboardName);
+                        }
+                        else
+                            highScore.text = "0";
+                    });
+            }
+            else
+            {
+                highScore.text = "" + GameData.Instance().highScore;
+                username.text = GameData.Instance().username;
+            }
 
-            highScore.text = "" + GameData.Instance().highScore;
             lastScore.text = "" + GameData.Instance().lastScore;
             magnetCount.text = "" + GameData.Instance().magnetBoosterCount;
             slowCount.text = "" + GameData.Instance().slowBoosterCount;
             bombCount.text = "" + GameData.Instance().bombBoosterCount;
         }
-        
+
+
         private float GetBannerHeight()
         {
             float height = Mathf.RoundToInt(50 * Screen.dpi / 160);
@@ -240,6 +359,7 @@ namespace Managers
 
         public void MagnetPower()
         {
+            if (GameData.Instance().magnetBoosterCount == 0) return;
             GameData.Instance().magnetBoosterCount--;
             Magnet();
             UpdateUI();
@@ -247,12 +367,18 @@ namespace Managers
 
         public void SlowPower()
         {
-            
+            if (GameData.Instance().slowBoosterCount == 0) return;
+            GameData.Instance().slowBoosterCount--;
+            Slow();
+            UpdateUI();
         }
 
         public void BombPower()
         {
-            
+            if (GameData.Instance().bombBoosterCount == 0) return;
+            GameData.Instance().bombBoosterCount--;
+            Bomb();
+            UpdateUI();
         }
     }
 }

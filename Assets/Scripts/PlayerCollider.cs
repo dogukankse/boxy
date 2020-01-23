@@ -17,7 +17,6 @@ public class PlayerCollider : MonoBehaviour
         if (other.CompareTag("Point"))
         {
             Score++;
-            print(Score);
             Destroy(other.gameObject);
             UpdateScore(Score);
         }

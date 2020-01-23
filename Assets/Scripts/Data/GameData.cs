@@ -1,7 +1,12 @@
-﻿using Data;
+﻿using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using Data;
 using Managers;
 using UnityEngine;
 
+[Serializable]
 public class GameData
 {
     private static GameData instance;
@@ -22,7 +27,7 @@ public class GameData
 
     #region GameState
 
-    public State gameState;
+    [NonSerialized] public State gameState;
 
     #endregion
 
@@ -43,13 +48,34 @@ public class GameData
 
     #region Settings
 
-    public float bornDelay = .5f;
-    public float objectSpeed = 2f;
-    public float pointBornRatio = .8f;
-    public float playerSpeed = 10f;
+    [NonSerialized] public float bornDelay = .5f;
+    [NonSerialized] public float objectSpeed = 2f;
+    [NonSerialized] public float pointBornRatio = .8f;
+    [NonSerialized] public float playerSpeed = 10f;
 
     #endregion
 
     public Color color = ColorData.InitialColor();
-    public float mainCanvasHeight;
+    public string username;
+    public string language = "English";
+
+    public byte[] SerializeGameData()
+    {
+        byte[] data;
+        using (MemoryStream stream = new MemoryStream())
+        {
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(stream, this);
+            data = stream.ToArray();
+        }
+
+        return data;
+    }
+
+    public override string ToString()
+    {
+        return
+            $"GameState: {gameState}\nHS: {highScore} LS: {lastScore}\nMagnetCount: {magnetBoosterCount}" +
+            $"SlowCount: {slowBoosterCount} BombCount: {bombBoosterCount}\n Color: {color} Username: {username} Language: {language}";
+    }
 }

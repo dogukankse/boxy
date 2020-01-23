@@ -23,6 +23,7 @@ namespace Managers
 
             strings = new Hashtable();
             XmlElement element = xml.DocumentElement[language];
+            Debug.Log(language);
             if (element != null)
             {
                 IEnumerator elemEnum = element.GetEnumerator();

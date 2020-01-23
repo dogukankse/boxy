@@ -1,10 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
-using DG.Tweening.Core;
-using DG.Tweening.Plugins;
-using DG.Tweening.Plugins.Core.PathCore;
-using DG.Tweening.Plugins.Options;
+using EasyMobile;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -35,7 +31,7 @@ namespace Managers
 
         private int callID;
         private int cubeID;
-        private List<GameObject> currentCubes;
+        public List<GameObject> currentCubes;
 
 
         private float gameWidth;
@@ -47,19 +43,19 @@ namespace Managers
             print($"width: {Screen.width} height: {Screen.height}");
             print(
                 $"rect.size width: {canvas.GetComponent<RectTransform>().rect.size.x} rect.size height: {canvas.GetComponent<RectTransform>().rect.size.y}");
-            print($"{Mathf.Abs(player.anchoredPosition.y * 100) / canvas.GetComponent<RectTransform>().rect.size.y}");
-            print($"{player.anchoredPosition.y} {canvas.GetComponent<RectTransform>().rect.size.y}");
+            print($"{canvas.GetComponent<RectTransform>().sizeDelta}");
 
             currentCubes = new List<GameObject>();
-            gameWidth = canvas.GetComponent<RectTransform>().rect.size.x;
-            gameHeight = canvas.GetComponent<RectTransform>().rect.size.y;
-            //gameWidth = Screen.width;
-            //gameHeight = Screen.height;
+            //gameWidth = canvas.GetComponent<RectTransform>().rect.size.x;
+            //gameHeight = canvas.GetComponent<RectTransform>().rect.size.y;
+            gameWidth = Screen.width;
+            gameHeight = Screen.height;
 
 
             bornLeftX = (gameWidth / -2f);
             bornRightX = (gameWidth / 2f);
-            bornY = gameHeight / 2f + (gameHeight / 10f);
+            bornY = 2f * gameHeight / 10f; // + (gameHeight / 10f);
+            bornY = gameHeight + (gameHeight / 50f); // + (gameHeight / 10f);
 
             /*GameObject go = new GameObject("endLeft");
             go.transform.SetParent(canvas.transform);
@@ -105,9 +101,11 @@ namespace Managers
         void CreateCube()
         {
             GameObject cube;
-            startPosX = Random.Range(bornLeftX, bornRightX);
+            startPosX = Random.Range(bornLeftX - gameWidth / 10f, bornRightX + gameWidth / 10f);
+            float r = Random.Range(0f, 1f);
+            //print($"{GameData.Instance().pointBornRatio} {r}");
 
-            if (GameData.Instance().pointBornRatio <= Random.Range(0f, 1f))
+            if (GameData.Instance().pointBornRatio <= r)
             {
                 cube = Instantiate(obstacle, canvas.transform, false);
                 cubeID = 10;
@@ -141,17 +139,21 @@ namespace Managers
              
  */
 
-            float curve = Random.Range((Screen.width * 13.5f) / 100f, Screen.width - (Screen.width * 13.5f) / 100f);
-
+            //float curve = Random.Range((Screen.width * 13.5f) / 100f, Screen.width - (Screen.width * 13.5f) / 100f);
+            float curve = Random.Range((gameWidth * 14f) / 100f, gameWidth - (gameWidth * 14f) / 100f);
             rectTransform.DOPath(
                     new Vector3[]
                     {
-                        new Vector3(Screen.width / 2f, Screen.height),
-                        new Vector2(curve, (Screen.height * 23f) / 100f),
-                        new Vector3(curve, -100)
+                        /* new Vector3(Screen.width / 2f, Screen.height),
+                         new Vector2(curve, (Screen.height * 23f) / 100f),
+                         new Vector3(curve, -100)*/
+                        //new Vector2(gameWidth / 2f, gameHeight),
+                        new Vector2(curve, gameHeight * 23f / 100f),
+                        new Vector2(curve, -gameHeight / 10f), //-100f),
                     },
                     GameData.Instance().objectSpeed, PathType.CatmullRom,
-                    PathMode.Ignore, 5, null)
+                    PathMode.Ignore, 5, Color.red)
+                .SetEase(Ease.Linear)
                 .OnStart(() =>
                 {
                     rectTransform.DORotate(new Vector3(0, 0, 360), GameData.Instance().objectSpeed,
@@ -175,6 +177,8 @@ namespace Managers
             print("gameManager on destroy");
             DOTween.Kill(callID);
             GameData.Instance().lastScore = playerCollider.Score;
+            if (GameServices.IsInitialized())
+                GameServices.ReportScore(GameData.Instance().lastScore, EM_GameServicesConstants.Leaderboard_Rakings);
             if (GameData.Instance().lastScore > GameData.Instance().highScore)
                 GameData.Instance().highScore = GameData.Instance().lastScore;
             UpdeteUI();
@@ -185,21 +189,6 @@ namespace Managers
             return scoreText;
         }
 
-        Vector3 Interpolate(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float u)
-        {
-            return (
-                0.5f *
-                (
-                    (-a + 3f * b - 3f * c + d) *
-                    (u * u * u) +
-                    (2f * a - 5f * b + 4f * c - d) *
-                    (u * u) +
-                    (-a + c) *
-                    u + 2f * b
-                )
-            );
-        }
-
         public void Magnet()
         {
             DOTween.Kill(11);
@@ -208,10 +197,23 @@ namespace Managers
                 if (cube != null)
                     DOTween.To(() => cube.GetComponent<RectTransform>().anchoredPosition3D,
                         (x) => { cube.GetComponent<RectTransform>().DOMove(playerCollider.transform.position, 1f); },
-                        player.transform.position, 1f);
-                /*cube.GetComponent<RectTransform>().DOMove(
-                    playerCollider.transform.position, 1f
-                ).OnComplete(RemoveNulls);*/
+                        player.transform.position, 1f).OnComplete(RemoveNulls);
+            }
+        }
+
+        public void Slow()
+        {
+            GameData.Instance().objectSpeed *= 2f;
+            float start = 0;
+            DOTween.To(() => start, (x) => start = x, 3f, 3f)
+                .OnComplete(() => { GameData.Instance().objectSpeed /= 2f; });
+        }
+
+        public void Bomb()
+        {
+            foreach (GameObject cube in currentCubes)
+            {
+                Destroy(cube);
             }
 
             RemoveNulls();

@@ -1,17 +1,18 @@
 using System;
-using Coffee.UIExtensions;
+using EasyMobile;
 using UnityEngine;
-using UnityEngine.UI.Extensions;
 
 namespace Managers
 {
     public enum State
     {
-        START_PLAYING,
         PLAYING,
         PAUSE,
         EXIT_PLAYING,
-        MAIN_MENU
+        MAIN_MENU,
+        SETTINGS,
+        SHOP,
+        RANKINGS
     }
 
     public class AppManager : MonoBehaviour
@@ -22,16 +23,51 @@ namespace Managers
 
         private State gameState;
         private GameObject game;
+        private SavedGame save;
 
         private void Awake()
         {
-            LanguageManager.Instance().SetLanguage("English");
+            GameServices.Init();
+            if (GameServices.IsInitialized())
+            {
+                save = SaveManager.OpenCloudData();
+                SaveManager.CloudLoad(save);
+            }
+
+            LanguageManager.Instance().SetLanguage(GameData.Instance().language);
+
             GameData.Instance().gameState = State.MAIN_MENU;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             uiManager.SetTexts();
             uiManager.CreateGameWindow = CreateGame;
             uiManager.DestroyGame = DestroyGame;
+            AdsManager.Instance().OnRewardedVideoFinished = uiManager.UpdateUI;
         }
+
+
+        private void OnEnable()
+        {
+            GameServices.UserLoginSucceeded += OnUserLoginSucceeded;
+            GameServices.UserLoginFailed += OnUserLoginFailed;
+        }
+
+        private void OnDisable()
+        {
+            GameServices.UserLoginSucceeded -= OnUserLoginSucceeded;
+            GameServices.UserLoginFailed -= OnUserLoginFailed;
+        }
+
+        void OnUserLoginSucceeded()
+        {
+            Debug.Log("User logged in successfully.");
+            uiManager.UpdateUI();
+        }
+
+        void OnUserLoginFailed()
+        {
+            Debug.Log("User login failed.");
+        }
+
 
         private void CreateGame(GameObject frame)
         {
@@ -39,15 +75,18 @@ namespace Managers
             game = Instantiate(gameScreen, frame.transform, false);
             StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
             gameManager = game.GetComponentInChildren<GameManager>();
-            GameData.Instance().gameState = State.PLAYING;
             uiManager.SetScoreText(gameManager.GetScoreText());
             gameManager.playerCollider.UpdateScore = uiManager.SetScore;
             gameManager.playerCollider.GameOver = uiManager.GameOver;
             gameManager.UpdeteUI = uiManager.UpdateUI;
+
             uiManager.Magnet = gameManager.Magnet;
+            uiManager.Slow = gameManager.Slow;
+            uiManager.Bomb = gameManager.Bomb;
 
             gameManager.magnet.onClick.AddListener(uiManager.MagnetPower);
-
+            gameManager.slow.onClick.AddListener(uiManager.SlowPower);
+            gameManager.bomb.onClick.AddListener(uiManager.BombPower);
 
             uiManager.game = game;
             uiManager.explotion = game.GetComponentInChildren<ParticleSystem>();
