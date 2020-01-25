@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: EM_Settings
   m_EditorClassIdentifier: 
   mAdvertisingSettings:
-    mAutoLoadAdsMode: 2
-    mAdCheckingInterval: 10
-    mAdLoadingInterval: 20
+    mAutoLoadAdsMode: 0
+    mAdCheckingInterval: 5
+    mAdLoadingInterval: 5
     mIosDefaultAdNetworks:
-      bannerAdNetwork: 0
-      interstitialAdNetwork: 0
-      rewardedAdNetwork: 0
+      bannerAdNetwork: 10
+      interstitialAdNetwork: 10
+      rewardedAdNetwork: 10
     mAndroidDefaultAdNetworks:
-      bannerAdNetwork: 0
-      interstitialAdNetwork: 0
-      rewardedAdNetwork: 0
+      bannerAdNetwork: 10
+      interstitialAdNetwork: 10
+      rewardedAdNetwork: 10
     mAdColony:
       mAppId:
         mIosId: 
@@ -184,11 +184,11 @@ MonoBehaviour:
         values: []
     mUnityAds:
       mAppId:
-        mIosId: 
-        mAndroidId: 
+        mIosId: 3392126
+        mAndroidId: 3392127
       mDefaultBannerAdId:
-        mIosId: 
-        mAndroidId: 
+        mIosId: banner
+        mAndroidId: banner
       mDefaultInterstitialAdId:
         mIosId: video
         mAndroidId: video
@@ -204,7 +204,7 @@ MonoBehaviour:
       mCustomRewardedAdIds:
         keys: []
         values: []
-      mEnableTestMode: 0
+      mEnableTestMode: 1
   mGameServiceSettings:
     mAutoInit: 0
     mAutoInitDelay: 0.5
@@ -268,7 +268,14 @@ MonoBehaviour:
       mContent: 
       mTitle: Privacy Consent
       mToggles: []
-      mActionButtons: []
+      mActionButtons:
+      - id: 
+        title: 
+        interactable: 0
+        titleColor: {r: 0, g: 0, b: 0, a: 0}
+        backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+        uninteractableTitleColor: {r: 0, g: 0, b: 0, a: 0}
+        uninteractableBackgroundColor: {r: 0, g: 0, b: 0, a: 0}
     mConsentDialogComposerSettings:
       mToggleSelectedIndex: 0
       mButtonSelectedIndex: 0
@@ -331,6 +338,6 @@ MonoBehaviour:
   mIsIAPModuleEnable: 0
   mIsGameServiceModuleEnable: 1
   mIsNotificationModuleEnable: 0
-  mIsSharingModuleEnable: 1
-  mActiveModuleIndex: 1
-  mIsSelectingModule: 0
+  mIsSharingModuleEnable: 0
+  mActiveModuleIndex: 8
+  mIsSelectingModule: 1

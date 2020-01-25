@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using EasyMobile;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace Managers
 {
@@ -15,6 +17,14 @@ namespace Managers
         [SerializeField] private GameObject obstacle;
         [SerializeField] public PlayerCollider playerCollider;
         [SerializeField] private Text scoreText;
+
+        [SerializeField] private GameObject magnetBooster;
+        [SerializeField] private GameObject slowBooster;
+        [SerializeField] private GameObject bombBooster;
+
+        private bool isBoosterValid = true;
+        private bool isSpeedValid = true;
+        private bool isRatioValid = true;
 
 
         public Button magnet;
@@ -28,15 +38,14 @@ namespace Managers
         private float bornY;
         private float startPosX;
 
-
         private int callID;
         private int cubeID;
         public List<GameObject> currentCubes;
 
-
         private float gameWidth;
         private float gameHeight;
 
+        #region UnityLifeCycle
 
         private void Awake()
         {
@@ -56,38 +65,7 @@ namespace Managers
             bornRightX = (gameWidth / 2f);
             bornY = 2f * gameHeight / 10f; // + (gameHeight / 10f);
             bornY = gameHeight + (gameHeight / 50f); // + (gameHeight / 10f);
-
-            /*GameObject go = new GameObject("endLeft");
-            go.transform.SetParent(canvas.transform);
-            RectTransform r = go.AddComponent<RectTransform>();
-            r.anchoredPosition = new Vector2(endLeftX, endY);
-            r.sizeDelta = new Vector2(1, 1);
-
-            go = new GameObject("endright");
-            go.transform.SetParent(canvas.transform);
-            r = go.AddComponent<RectTransform>();
-            r.anchoredPosition = new Vector2(endRightX, endY);
-            r.sizeDelta = new Vector2(1, 1);
-
-            go = new GameObject("bornright");
-            go.transform.SetParent(canvas.transform);
-            r = go.AddComponent<RectTransform>();
-            r.anchoredPosition = new Vector2(bornRightX, bornY);
-            r.sizeDelta = new Vector2(1, 1);
-
-            go = new GameObject("bornleft");
-            go.transform.SetParent(canvas.transform);
-            r = go.AddComponent<RectTransform>();
-            r.anchoredPosition = new Vector2(bornLeftX, bornY);
-            r.sizeDelta = new Vector2(1, 1);
-
-            go = new GameObject("die");
-            go.transform.SetParent(canvas.transform);
-            r = go.AddComponent<RectTransform>();
-            r.anchoredPosition = new Vector2(0, dieY);
-            r.sizeDelta = new Vector2(1, 1);*/
         }
-
 
         private void Start()
         {
@@ -97,80 +75,29 @@ namespace Managers
                 .SetLoops(-1).SetId(callID);
         }
 
-
-        void CreateCube()
+        private void Update()
         {
-            GameObject cube;
-            startPosX = Random.Range(bornLeftX - gameWidth / 10f, bornRightX + gameWidth / 10f);
-            float r = Random.Range(0f, 1f);
-            //print($"{GameData.Instance().pointBornRatio} {r}");
+            if (playerCollider.Score == 0) return;
 
-            if (GameData.Instance().pointBornRatio <= r)
+            if (playerCollider.Score % 5 == 0 && isSpeedValid)
             {
-                cube = Instantiate(obstacle, canvas.transform, false);
-                cubeID = 10;
+                print("update speed");
+                GameData.Instance().objectSpeed += 0.2f;
+                GameData.Instance().playerSpeed += 0.2f;
+                isSpeedValid = false;
             }
-            else
+            else if (playerCollider.Score % 5 != 0)
+                isSpeedValid = true;
+
+            if (playerCollider.Score % 10 == 0 && isRatioValid)
             {
-                cube = Instantiate(point, canvas.transform, false);
-                cube.GetComponent<Image>().color = GameData.Instance().color;
-                cubeID = 11;
-                currentCubes.Add(cube);
+                print("Update ratio");
+                isRatioValid = false;
+                //TODO: puan ve engel sayıları güncellenecek
             }
-
-            RectTransform rectTransform = cube.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(startPosX, bornY);
-            //float size = 100f * (Screen.width / Screen.height);
-            //rectTransform.
-
-            /*rectTransform.DORotate(new Vector3(0, 0, 360), GameData.Instance().objectSpeed,
-                RotateMode.LocalAxisAdd).SetLoops(-1).SetRelative();
-            rectTransform.DOAnchorPos(new Vector2(startPosX, dieY), GameData.Instance().objectSpeed)
-                .SetEase(Ease.InSine).OnComplete(() => Destroy(cube));*/
-
-            /* float myFloat = 0;
-             DOTween.To(() => myFloat, (x) =>
-             {
-                 myFloat = x;
-                 rectTransform.anchoredPosition = Interpolate(new Vector2(startPosX, bornY),
-                     new Vector3(Screen.width / 2, Screen.height), endPos,
-                     new Vector3(endPosX, -100), x);
-             }, 1, GameData.Instance().objectSpeed).OnComplete(() => Destroy(cube)).SetAutoKill(false);
-             
- */
-
-            //float curve = Random.Range((Screen.width * 13.5f) / 100f, Screen.width - (Screen.width * 13.5f) / 100f);
-            float curve = Random.Range((gameWidth * 14f) / 100f, gameWidth - (gameWidth * 14f) / 100f);
-            rectTransform.DOPath(
-                    new Vector3[]
-                    {
-                        /* new Vector3(Screen.width / 2f, Screen.height),
-                         new Vector2(curve, (Screen.height * 23f) / 100f),
-                         new Vector3(curve, -100)*/
-                        //new Vector2(gameWidth / 2f, gameHeight),
-                        new Vector2(curve, gameHeight * 23f / 100f),
-                        new Vector2(curve, -gameHeight / 10f), //-100f),
-                    },
-                    GameData.Instance().objectSpeed, PathType.CatmullRom,
-                    PathMode.Ignore, 5, Color.red)
-                .SetEase(Ease.Linear)
-                .OnStart(() =>
-                {
-                    rectTransform.DORotate(new Vector3(0, 0, 360), GameData.Instance().objectSpeed,
-                        RotateMode.FastBeyond360).SetLoops(-1).SetEase(Ease.Linear).SetRelative(true);
-                })
-                .OnComplete(() =>
-                {
-                    Destroy(cube);
-                    RemoveNulls();
-                }).SetId(cubeID);
+            else if (playerCollider.Score % 10 != 0)
+                isRatioValid = true;
         }
-
-        private void RemoveNulls()
-        {
-            currentCubes.RemoveAll(item => item == null);
-        }
-
 
         private void OnDestroy()
         {
@@ -184,10 +111,9 @@ namespace Managers
             UpdeteUI();
         }
 
-        public Text GetScoreText()
-        {
-            return scoreText;
-        }
+        #endregion
+
+        #region Powerups
 
         public void Magnet()
         {
@@ -217,6 +143,99 @@ namespace Managers
             }
 
             RemoveNulls();
+        }
+
+        #endregion
+
+        void CreateCube()
+        {
+            GameObject cube = null;
+            startPosX = Random.Range(bornLeftX - gameWidth / 10f, bornRightX + gameWidth / 10f);
+            float r = Random.Range(0f, 1f);
+
+
+            if (playerCollider.Score % 30 == 0 && playerCollider.Score != 0 && isBoosterValid)
+            {
+                print("create booster");
+                if (r < 0.33f)
+                {
+                    //magnetbooster
+                    cube = Instantiate(magnetBooster, canvas.transform, false);
+                }
+                else if (r >= 0.33f && r < 0.66f)
+                {
+                    //slowbooster
+                    cube = Instantiate(slowBooster, canvas.transform, false);
+                }
+                else
+                {
+                    //bombbooster
+                    cube = Instantiate(bombBooster, canvas.transform, false);
+                }
+
+                cube.GetComponent<Image>().color = GameData.Instance().Color;
+                currentCubes.Add(cube);
+                cubeID = 11;
+
+                isBoosterValid = false;
+            }
+            else
+            {
+                if (GameData.Instance().pointBornRatio <= r)
+                {
+                    cube = Instantiate(obstacle, canvas.transform, false);
+                    cubeID = 10;
+                }
+                else
+                {
+                    cube = Instantiate(point, canvas.transform, false);
+                    cube.GetComponent<Image>().color = GameData.Instance().Color;
+                    cubeID = 11;
+                    currentCubes.Add(cube);
+                }
+            }
+
+            if (playerCollider.Score % 30 != 0)
+                isRatioValid = true;
+
+            RectTransform rectTransform = cube.GetComponent<RectTransform>();
+            rectTransform.anchoredPosition = new Vector2(startPosX, bornY);
+
+            float curve = Random.Range((gameWidth * 14f) / 100f, gameWidth - (gameWidth * 14f) / 100f);
+            rectTransform.DOPath(
+                    new Vector3[]
+                    {
+                        new Vector2(curve, gameHeight * 23f / 100f),
+                        new Vector2(curve, -gameHeight / 10f), //-100f),
+                    },
+                    GameData.Instance().objectSpeed, PathType.CatmullRom,
+                    PathMode.Ignore, 5, Color.red)
+                .SetEase(Ease.Linear)
+                .OnStart(() =>
+                {
+                    rectTransform.DORotate(new Vector3(0, 0, 360), GameData.Instance().objectSpeed,
+                        RotateMode.FastBeyond360).SetLoops(-1).SetEase(Ease.Linear).SetRelative(true);
+                })
+                .OnComplete(() =>
+                {
+                    Destroy(cube);
+                    RemoveNulls();
+                }).SetId(cubeID);
+        }
+
+        private void RemoveNulls()
+        {
+            currentCubes.RemoveAll(item => item == null);
+        }
+
+        public Text GetScoreText()
+        {
+            return scoreText;
+        }
+
+        private void RandomBoosterItem()
+        {
+            //todo: rasgele booster canı artıracak item düşecek
         }
     }
 }

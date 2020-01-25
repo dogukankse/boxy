@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Data;
 using DG.Tweening;
 using EasyMobile;
@@ -68,7 +69,6 @@ namespace Managers
 
 
         public GameObject game;
-        private GameObject currScreen;
 
         public UnityAction<GameObject> CreateGameWindow;
         public UnityAction DestroyGame;
@@ -76,60 +76,25 @@ namespace Managers
         public UnityAction Slow;
         public UnityAction Bomb;
 
+        #region UnityLifeCycle
+
         private void Start()
         {
             UpdateUI();
             RectTransform rt = frame.GetComponent<RectTransform>();
             rt.offsetMin = new Vector2(rt.offsetMin.x, GetBannerHeight());
-            colorPreview.color = GameData.Instance().color;
-
-            currScreen = mainMenu;
+            colorPreview.color = GameData.Instance().Color;
         }
 
         private void Update()
         {
             if (Input.GetKey(KeyCode.Escape))
-            {
-                /*if (GameData.Instance().gameState == State.PLAYING)
-                {
-                    DestroyGame();
-                    currScreen = mainMenu;
-                    mainMenu.SetActive(true);
-                    background.sprite = bg;
-                    pauseButton.SetActive(false);
-                    settingsButton.SetActive(true);
-                    shopButton.SetActive(true);
-                    GameData.Instance().gameState = State.MAIN_MENU;
-                }
-                else if (currScreen == tempPanel)
-                {
-                    mainMenu.SetActive(true);
-                    tempPanel.SetActive(false);
-                    currScreen = mainMenu;
-                    UpdateUI();
-                }
-                else if (GameData.Instance().gameState == State.PAUSE)
-                {
-                    Sequence sequence = DOTween.Sequence();
-                    sequence.PrependInterval(3).OnComplete(() =>
-                    {
-                        DOTween.TogglePauseAll();
-                        GameData.Instance().gameState = State.PLAYING;
-                        game.SetActive(true);
-                        pauseMenu.SetActive(false);
-                        sequence.Kill();
-                    });
-                }
-                else
-                {
-                    currScreen.SetActive(false);
-                    currScreen = mainMenu;
-                    mainMenu.SetActive(true);
-                    GameData.Instance().gameState = State.MAIN_MENU;
-                }*/
                 StateChange();
-            }
         }
+
+        #endregion
+
+        #region ButtonEvents
 
         public void OnPlayButtonClick()
         {
@@ -152,9 +117,8 @@ namespace Managers
             game.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
             background.sprite = gameBg;
             ParticleSystem.MainModule main = explotion.main;
-            main.startColor = GameData.Instance().color;
+            main.startColor = GameData.Instance().Color;
         }
-
 
         public void OnShareButtonClick()
         {
@@ -175,7 +139,6 @@ namespace Managers
         {
             GameData.Instance().gameState = State.SETTINGS;
             mainMenu.SetActive(false);
-            currScreen = settingsMenu;
             settingsMenu.SetActive(true);
             settingsButton.SetActive(false);
             shopButton.SetActive(false);
@@ -212,7 +175,6 @@ namespace Managers
         {
             GameData.Instance().gameState = State.SHOP;
             mainMenu.SetActive(false);
-            currScreen = shopMenu;
             shopMenu.SetActive(true);
             settingsButton.SetActive(false);
             shopButton.SetActive(false);
@@ -224,6 +186,30 @@ namespace Managers
         {
             StateChange();
         }
+
+
+        public void OnBombCountButtonClick()
+        {
+            if (GameData.Instance().bombBoosterCount != 0) return;
+            AdsManager.Instance().ShowRewardedVideo(1);
+        }
+
+        public void OnSlowCountButtonClick()
+        {
+            if (GameData.Instance().slowBoosterCount != 0) return;
+            AdsManager.Instance().ShowRewardedVideo(2);
+        }
+
+
+        public void OnMagnetCountButtonClick()
+        {
+            if (GameData.Instance().magnetBoosterCount != 0) return;
+            AdsManager.Instance().ShowRewardedVideo(3);
+        }
+
+        #endregion
+
+        #region Events
 
         private void StateChange()
         {
@@ -251,7 +237,6 @@ namespace Managers
                     break;
                 case State.PLAYING:
                     DestroyGame();
-                    currScreen = mainMenu;
                     mainMenu.SetActive(true);
                     background.sprite = bg;
                     pauseButton.SetActive(false);
@@ -274,6 +259,8 @@ namespace Managers
                         if (score != null)
                         {
                             highScore.text = score.value + "";
+                            if (GameData.Instance().highScore > score.value)
+                                highScore.text = GameData.Instance().highScore + "";
                             Debug.Log("Score: " + score.value + "leaderboard: " + leaderboardName);
                         }
                         else
@@ -287,10 +274,18 @@ namespace Managers
             }
 
             lastScore.text = "" + GameData.Instance().lastScore;
-            magnetCount.text = "" + GameData.Instance().magnetBoosterCount;
-            slowCount.text = "" + GameData.Instance().slowBoosterCount;
-            bombCount.text = "" + GameData.Instance().bombBoosterCount;
+            magnetCount.text = (GameData.Instance().magnetBoosterCount > 0)
+                ? "" + GameData.Instance().magnetBoosterCount
+                : "+";
+            slowCount.text = (GameData.Instance().slowBoosterCount > 0)
+                ? "" + GameData.Instance().slowBoosterCount
+                : "+";
+            bombCount.text = (GameData.Instance().bombBoosterCount > 0)
+                ? "" + GameData.Instance().bombBoosterCount
+                : "+";
         }
+
+        #endregion
 
 
         private float GetBannerHeight()
@@ -316,7 +311,7 @@ namespace Managers
         public void ChangeColor()
         {
             ColorData.NextColor();
-            colorPreview.color = GameData.Instance().color;
+            colorPreview.color = GameData.Instance().Color;
         }
 
         public void SetScore(int score)
@@ -338,7 +333,6 @@ namespace Managers
                 .AppendCallback(() => explotion.Play()).AppendInterval(2f).OnComplete(() =>
                 {
                     Destroy(game);
-                    currScreen = mainMenu;
                     GameData.Instance().gameState = State.MAIN_MENU;
                     mainMenu.SetActive(true);
                     settingsButton.SetActive(true);
@@ -354,7 +348,6 @@ namespace Managers
         {
             settingsMenu.SetActive(false);
             tempPanel.SetActive(true);
-            currScreen = tempPanel;
         }
 
         public void MagnetPower()
@@ -379,6 +372,14 @@ namespace Managers
             GameData.Instance().bombBoosterCount--;
             Bomb();
             UpdateUI();
+        }
+
+        public UnityAction UpdateGameUI(Text magnet, Text slow, Text bomb)
+        {
+            magnet.text = GameData.Instance().magnetBoosterCount + "";
+            slow.text = GameData.Instance().slowBoosterCount + "";
+            bomb.text = GameData.Instance().bombBoosterCount + "";
+            return null;
         }
     }
 }

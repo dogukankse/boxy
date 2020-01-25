@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Obstacle
   - Point
+  - MagnetBooster
+  - SlowBooster
+  - BombBooster
   layers:
   - Default
   - TransparentFX

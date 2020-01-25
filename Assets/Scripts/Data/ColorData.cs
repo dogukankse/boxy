@@ -10,11 +10,14 @@ namespace Data
 
         public static void NextColor()
         {
-            if (colors == null)
+            if (colors != null)
+            {
+                int index = colors.IndexOf(GameData.Instance().Color);
+                if (index == 7) index = -1;
+                GameData.Instance().Color = colors[index + 1];
+            }
+            else
                 CreateColors();
-            int index = colors.IndexOf(GameData.Instance().color);
-            if (index == 7) index = -1;
-            GameData.Instance().color = colors[index + 1];
         }
 
         private static void CreateColors()

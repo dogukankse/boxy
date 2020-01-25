@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using Data;
 using Managers;
 using UnityEngine;
@@ -14,6 +11,7 @@ public class GameData
     public static GameData Instance()
     {
         return instance ?? (instance = SaveManager.IsSaveExists() ? SaveManager.Load() : new GameData());
+        //return instance ?? (instance = new GameData());
     }
 
     public static void SetGameData(GameData gameData)
@@ -40,42 +38,65 @@ public class GameData
 
     #region Booster
 
-    public int magnetBoosterCount = 10;
-    public int slowBoosterCount = 10;
-    public int bombBoosterCount = 10;
+    public int magnetBoosterCount;
+    public int slowBoosterCount;
+    public int bombBoosterCount;
 
     #endregion
 
     #region Settings
 
-    [NonSerialized] public float bornDelay = .5f;
-    [NonSerialized] public float objectSpeed = 2f;
-    [NonSerialized] public float pointBornRatio = .8f;
-    [NonSerialized] public float playerSpeed = 10f;
+    [NonSerialized] public float bornDelay = 1f;
+    [NonSerialized] public float objectSpeed = 6f;
+    [NonSerialized] public float pointBornRatio = .7f;
+    [NonSerialized] public float playerSpeed = 5f;
+    public string language = "English";
 
     #endregion
 
-    public Color color = ColorData.InitialColor();
-    public string username;
-    public string language = "English";
+    #region Color
 
-    public byte[] SerializeGameData()
+    private float r = ColorData.InitialColor().r;
+
+    private float g = ColorData.InitialColor().g;
+
+    private float b = ColorData.InitialColor().b;
+
+    private float a = ColorData.InitialColor().a;
+
+    [NonSerialized] private Color color = Color.clear;
+
+    public Color Color
     {
-        byte[] data;
-        using (MemoryStream stream = new MemoryStream())
+        get
         {
-            IFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(stream, this);
-            data = stream.ToArray();
-        }
+            if (color == Color.clear)
+            {
+                color = new Color(r, g, b, a);
+            }
 
-        return data;
+            return color;
+        }
+        set
+        {
+            r = value.r;
+            g = value.g;
+            b = value.b;
+            a = value.a;
+            color = value;
+        }
     }
+
+    #endregion
+
+    public string username;
+
 
     public override string ToString()
     {
         return
             $"GameState: {gameState}\nHS: {highScore} LS: {lastScore}\nMagnetCount: {magnetBoosterCount}" +
-            $"SlowCount: {slowBoosterCount} BombCount: {bombBoosterCount}\n Color: {color} Username: {username} Language: {language}";
+            $"SlowCount: {slowBoosterCount} BombCount: {bombBoosterCount}\n Color: {color} r:{r} g:{g} b: {b} a:{a}" +
+            $"Username: {username} Language: {language}";
     }
 }

@@ -1,6 +1,8 @@
 using System;
+using DG.Tweening;
 using EasyMobile;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Managers
 {
@@ -25,16 +27,22 @@ namespace Managers
         private GameObject game;
         private SavedGame save;
 
+        private ConsentStatus unityAdsConsent;
+
+
+        #region UnityLifeCycle
+
         private void Awake()
         {
-            GameServices.Init();
-            if (GameServices.IsInitialized())
-            {
-                save = SaveManager.OpenCloudData();
-                SaveManager.CloudLoad(save);
-            }
+            //for google play services
+            if (!GameServices.IsInitialized())
+                GameServices.Init();
 
+            //default or last language
             LanguageManager.Instance().SetLanguage(GameData.Instance().language);
+
+            //dotween settings
+            DOTween.logBehaviour = LogBehaviour.Default;
 
             GameData.Instance().gameState = State.MAIN_MENU;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -57,6 +65,16 @@ namespace Managers
             GameServices.UserLoginFailed -= OnUserLoginFailed;
         }
 
+        private void OnDestroy()
+        {
+            SaveManager.Save();
+        }
+
+        #endregion
+
+
+        #region Events
+
         void OnUserLoginSucceeded()
         {
             Debug.Log("User logged in successfully.");
@@ -66,8 +84,10 @@ namespace Managers
         void OnUserLoginFailed()
         {
             Debug.Log("User login failed.");
+            uiManager.UpdateUI();
         }
 
+        #endregion
 
         private void CreateGame(GameObject frame)
         {
@@ -78,7 +98,11 @@ namespace Managers
             uiManager.SetScoreText(gameManager.GetScoreText());
             gameManager.playerCollider.UpdateScore = uiManager.SetScore;
             gameManager.playerCollider.GameOver = uiManager.GameOver;
-            gameManager.UpdeteUI = uiManager.UpdateUI;
+            
+            
+            gameManager.UpdeteUI += uiManager.UpdateUI;
+            gameManager.UpdeteUI += uiManager.UpdateGameUI(gameManager.magnet.GetComponentInChildren<Text>(),
+                gameManager.slow.GetComponentInChildren<Text>(), gameManager.bomb.GetComponentInChildren<Text>());
 
             uiManager.Magnet = gameManager.Magnet;
             uiManager.Slow = gameManager.Slow;
@@ -88,6 +112,7 @@ namespace Managers
             gameManager.slow.onClick.AddListener(uiManager.SlowPower);
             gameManager.bomb.onClick.AddListener(uiManager.BombPower);
 
+
             uiManager.game = game;
             uiManager.explotion = game.GetComponentInChildren<ParticleSystem>();
         }
@@ -95,12 +120,6 @@ namespace Managers
         private void DestroyGame()
         {
             Destroy(game);
-        }
-
-        private void OnDestroy()
-        {
-            SaveManager.Save();
-            print("appmanager on destroy");
         }
     }
 }

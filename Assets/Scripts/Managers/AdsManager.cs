@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Advertisements;
@@ -36,12 +35,7 @@ private bool testMode = false;
 
         public static AdsManager Instance()
         {
-            if (instance == null)
-            {
-                instance = new AdsManager();
-            }
-
-            return instance;
+            return instance ?? (instance = new AdsManager());
         }
 
         public IEnumerator ShowBannerWhenReady()
@@ -81,25 +75,30 @@ private bool testMode = false;
 
         public void OnUnityAdsDidFinish(string placementId, ShowResult showResult)
         {
+            Debug.Log($"burada {placementId} {showResult}");
             switch (showResult)
             {
                 case ShowResult.Finished:
                     if (buttonID == 1)
                     {
-                        GameData.Instance().magnetBoosterCount++;
+                        GameData.Instance().bombBoosterCount += 1;
+                        Debug.Log("burada1");
                     }
                     else if (buttonID == 2)
                     {
-                        GameData.Instance().slowBoosterCount++;
+                        GameData.Instance().slowBoosterCount += 1;
+                        Debug.Log("burada2");
                     }
                     else if (buttonID == 3)
                     {
-                        GameData.Instance().magnetBoosterCount++;
+                        Debug.Log("burada3");
+
+                        GameData.Instance().magnetBoosterCount += 1;
                     }
 
                     buttonID = 0;
                     OnRewardedVideoFinished();
-
+                    Debug.Log("placement id: " + placementId);
                     break;
                 case ShowResult.Failed:
                     Debug.LogWarning("The ad did not finish due to an error.");

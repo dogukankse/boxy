@@ -25,10 +25,20 @@ public class PlayerCollider : MonoBehaviour
             print("game over");
             GameOver();
         }
-    }
-
-    public Vector2 GetAnchorPos()
-    {
-        return this.GetComponent<RectTransform>().anchoredPosition;
+        else if (other.CompareTag("MagnetBooster"))
+        {
+            GameData.Instance().magnetBoosterCount += 1;
+            Destroy(other.gameObject);
+        }
+        else if (other.CompareTag("SlowBooster"))
+        {
+            GameData.Instance().slowBoosterCount += 1;
+            Destroy(other.gameObject);
+        }
+        else if (other.CompareTag("BombBooster"))
+        {
+            GameData.Instance().bombBoosterCount += 1;
+            Destroy(other.gameObject);
+        }
     }
 }
