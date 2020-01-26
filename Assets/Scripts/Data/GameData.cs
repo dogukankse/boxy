@@ -38,9 +38,9 @@ public class GameData
 
     #region Booster
 
-    public int magnetBoosterCount;
-    public int slowBoosterCount;
-    public int bombBoosterCount;
+    public int magnetBoosterCount = 5;
+    public int slowBoosterCount = 5;
+    public int bombBoosterCount = 5;
 
     #endregion
 

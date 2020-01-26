@@ -123,10 +123,9 @@ namespace Managers
         public void OnShareButtonClick()
         {
             GameData.Instance().gameState = State.RANKINGS;
-            mainMenu.SetActive(false);
-            settingsButton.SetActive(false);
-            shopButton.SetActive(false);
             rankingsScreen.SetActive(true);
+            backButton.SetActive(false);
+            settingsMenu.SetActive(false);
         }
 
         public void OnRankingButtonClick()
@@ -213,6 +212,7 @@ namespace Managers
 
         private void StateChange()
         {
+            print(GameData.Instance().gameState);
             switch (GameData.Instance().gameState)
             {
                 case State.PAUSE:
@@ -244,6 +244,13 @@ namespace Managers
                     shopButton.SetActive(true);
                     GameData.Instance().gameState = State.MAIN_MENU;
                     break;
+                case State.RANKINGS:
+                    rankingsScreen.SetActive(false);
+                    mainMenu.SetActive(true);
+                    shopButton.SetActive(true);
+                    settingsButton.SetActive(true);
+                    GameData.Instance().gameState = State.MAIN_MENU;
+                    break;
             }
         }
 
@@ -253,14 +260,22 @@ namespace Managers
             if (GameServices.IsInitialized())
             {
                 username.text = GameServices.LocalUser.userName;
+                GameData.Instance().username = GameServices.LocalUser.userName;
                 GameServices.LoadLocalUserScore(EM_GameServicesConstants.Leaderboard_Rakings,
                     (string leaderboardName, IScore score) =>
                     {
                         if (score != null)
                         {
-                            highScore.text = score.value + "";
                             if (GameData.Instance().highScore > score.value)
+                            {
                                 highScore.text = GameData.Instance().highScore + "";
+                            }
+                            else
+                            {
+                                highScore.text = score.value + "";
+                                GameData.Instance().highScore = (int) score.value;
+                            }
+
                             Debug.Log("Score: " + score.value + "leaderboard: " + leaderboardName);
                         }
                         else
@@ -270,7 +285,7 @@ namespace Managers
             else
             {
                 highScore.text = "" + GameData.Instance().highScore;
-                username.text = GameData.Instance().username;
+                username.text = GameData.Instance().username ?? "Boxy";
             }
 
             lastScore.text = "" + GameData.Instance().lastScore;

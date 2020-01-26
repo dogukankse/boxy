@@ -56,6 +56,10 @@ namespace Managers
                     savedData.objectSpeed = 6f;
                     savedData.pointBornRatio = .7f;
                     savedData.playerSpeed = 5f;
+
+                    
+                    
+                    
                     return savedData;
                 }
             }
