@@ -1945,7 +1945,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1099.3, y: -112.80002}
+  m_AnchoredPosition: {x: 1099.3, y: -112.80001}
   m_SizeDelta: {x: 709.3, y: 147.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &250023252
@@ -3519,7 +3519,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 390, y: -112.80002}
+  m_AnchoredPosition: {x: 390, y: -112.80001}
   m_SizeDelta: {x: 709.3, y: 147.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &398314080
@@ -6809,6 +6809,7 @@ MonoBehaviour:
     type: 3}
   uiManager: {fileID: 1820343072}
   gameManager: {fileID: 0}
+  videoAdLimit: 5
 --- !u!4 &786270579
 Transform:
   m_ObjectHideFlags: 0

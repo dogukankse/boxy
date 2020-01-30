@@ -60,6 +60,11 @@ private bool testMode = false;
             Advertisement.Show(rewardedID);
         }
 
+        public void ShowVideo()
+        {
+            Advertisement.Show();
+        }
+
         public void OnUnityAdsReady(string placementId)
         {
         }

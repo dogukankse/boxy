@@ -233,9 +233,72 @@ MonoBehaviour:
     mSimulateAppleAskToBuy: 0
     mInterceptApplePromotionalPurchases: 0
     mEnableAmazonSandboxTesting: 0
-    mValidateAppleReceipt: 1
-    mValidateGooglePlayReceipt: 1
-    mProducts: []
+    mValidateAppleReceipt: 0
+    mValidateGooglePlayReceipt: 0
+    mProducts:
+    - _name: 5Magnet
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 20Magnet
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 100Magnet
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 5Bomb
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 20Bomb
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 100Bomb
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 5Slow
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 20Slow
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
+    - _name: 100Slow
+      _type: 0
+      _id: 
+      _price: 
+      _description: 
+      _storeSpecificIds: []
+      _isEditingAdvanced: 0
   mNotificationSettings:
     mAutoInit: 1
     mAutoInitDelay: 0
@@ -335,9 +398,9 @@ MonoBehaviour:
       - mKey: NSContactsUsageDescription
         mValue: '[Your usage description]'
   mIsAdModuleEnable: 0
-  mIsIAPModuleEnable: 0
+  mIsIAPModuleEnable: 1
   mIsGameServiceModuleEnable: 1
   mIsNotificationModuleEnable: 0
   mIsSharingModuleEnable: 1
-  mActiveModuleIndex: 7
-  mIsSelectingModule: 0
+  mActiveModuleIndex: 3
+  mIsSelectingModule: 1

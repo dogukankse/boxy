@@ -22,18 +22,23 @@ namespace Managers
         [SerializeField] private GameObject gameScreen;
         [SerializeField] private UIManager uiManager;
         [SerializeField] private GameManager gameManager;
+        [SerializeField] private int videoAdLimit;
 
         private State gameState;
         private GameObject game;
         private SavedGame save;
 
-        private ConsentStatus unityAdsConsent;
+        private int _gameCount;
 
 
         #region UnityLifeCycle
 
         private void Awake()
         {
+            //easymobile init
+            if (!RuntimeManager.IsInitialized())
+                RuntimeManager.Init();
+
             //for google play services
             if (!GameServices.IsInitialized())
                 GameServices.Init();
@@ -42,7 +47,9 @@ namespace Managers
             LanguageManager.Instance().SetLanguage(GameData.Instance().language);
 
             //dotween settings
-            DOTween.logBehaviour = LogBehaviour.Default;
+            DOTween.logBehaviour = LogBehaviour.Verbose;
+
+            _gameCount = 0;
 
             GameData.Instance().gameState = State.MAIN_MENU;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -52,6 +59,17 @@ namespace Managers
             AdsManager.Instance().OnRewardedVideoFinished = uiManager.UpdateUI;
         }
 
+        private void Update()
+        {
+            if (GameData.Instance().gameState == State.MAIN_MENU)
+            {
+                if (_gameCount == videoAdLimit)
+                {
+                    AdsManager.Instance().ShowVideo();
+                    _gameCount = 0;
+                }
+            }
+        }
 
         private void OnEnable()
         {
@@ -91,6 +109,8 @@ namespace Managers
 
         private void CreateGame(GameObject frame)
         {
+            print("before createGame: " + _gameCount);
+            _gameCount += 1;
             Debug.Log("CreateGame girdi");
             game = Instantiate(gameScreen, frame.transform, false);
             StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
@@ -98,8 +118,8 @@ namespace Managers
             uiManager.SetScoreText(gameManager.GetScoreText());
             gameManager.playerCollider.UpdateScore = uiManager.SetScore;
             gameManager.playerCollider.GameOver = uiManager.GameOver;
-            
-            
+
+
             gameManager.UpdeteUI += uiManager.UpdateUI;
             gameManager.UpdeteUI += uiManager.UpdateGameUI(gameManager.magnet.GetComponentInChildren<Text>(),
                 gameManager.slow.GetComponentInChildren<Text>(), gameManager.bomb.GetComponentInChildren<Text>());
@@ -115,6 +135,8 @@ namespace Managers
 
             uiManager.game = game;
             uiManager.explotion = game.GetComponentInChildren<ParticleSystem>();
+
+            print("after createGame: " + _gameCount);
         }
 
         private void DestroyGame()
