@@ -2,12 +2,12 @@ using System.Collections;
 using System.Xml;
 using UnityEngine;
 
-namespace Managers
+namespace _Scripts.Managers
 {
     public class LanguageManager
     {
         private Hashtable strings;
-        private TextAsset textAsset = (TextAsset) Resources.Load("strings", typeof(TextAsset));
+        private readonly TextAsset textAsset = (TextAsset) Resources.Load("strings", typeof(TextAsset));
         private static LanguageManager instance;
 
         public static LanguageManager Instance()
@@ -22,20 +22,23 @@ namespace Managers
             xml.LoadXml(textAsset.text);
 
             strings = new Hashtable();
-            XmlElement element = xml.DocumentElement[language];
-            Debug.Log(language);
-            if (element != null)
+            if (xml.DocumentElement != null)
             {
-                IEnumerator elemEnum = element.GetEnumerator();
-                while (elemEnum.MoveNext())
+                XmlElement element = xml.DocumentElement[language];
+                Debug.Log(language);
+                if (element != null)
                 {
-                    XmlElement item = (XmlElement) elemEnum.Current;
-                    strings.Add(item.GetAttribute("name"), item.InnerText);
+                    IEnumerator elemEnum = element.GetEnumerator();
+                    while (elemEnum.MoveNext())
+                    {
+                        XmlElement item = (XmlElement) elemEnum.Current;
+                        if (item != null) strings.Add(item.GetAttribute("name"), item.InnerText);
+                    }
                 }
-            }
-            else
-            {
-                Debug.LogError("Language doesnt exist" + language);
+                else
+                {
+                    Debug.LogError("Language doesnt exist" + language);
+                }
             }
         }
 

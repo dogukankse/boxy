@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Data
+namespace _Scripts.Data
 {
     public static class ColorData
     {

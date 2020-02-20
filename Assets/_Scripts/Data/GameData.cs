@@ -1,4 +1,5 @@
 ﻿using System;
+using _Scripts.Data;
 using Data;
 using Managers;
 using UnityEngine;
@@ -48,7 +49,7 @@ public class GameData
 
     [NonSerialized] public float bornDelay = 1f;
     [NonSerialized] public float objectSpeed = 6f;
-    [NonSerialized] public float pointBornRatio = .7f;
+    [NonSerialized] public float pointBornRatio = .4f;
     [NonSerialized] public float playerSpeed = 5f;
     public string language = "English";
 

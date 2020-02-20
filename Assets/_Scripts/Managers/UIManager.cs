@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Collections;
+using _Scripts;
+using _Scripts.Data;
+using _Scripts.Managers;
 using Data;
 using DG.Tweening;
 using EasyMobile;
@@ -12,6 +14,17 @@ namespace Managers
 {
     public class UIManager : MonoBehaviour
     {
+        [Space(10)] [Header("Rankings")] [SerializeField]
+        private GameObject rankingsScreen;
+
+        [Space(10)] [Header("Boosters")] [SerializeField]
+        private Button magnetBooster;
+
+        [SerializeField] private Button slowBooster;
+        [SerializeField] private Button bombBooster;
+
+        #region UI
+
         [Header("Background")] [SerializeField]
         private Sprite gameBg;
 
@@ -27,16 +40,15 @@ namespace Managers
         [SerializeField] private GameObject shopButton;
         [SerializeField] private GameObject pauseButton;
         [SerializeField] private GameObject backButton;
-        [SerializeField] private GameObject rankingButton;
         [SerializeField] private GameObject frame;
         [SerializeField] private Text lastScoreText;
         [SerializeField] private Text rankingText;
         [SerializeField] private Text lastScore;
         [SerializeField] private Text highScore;
+        [SerializeField] private Text highscoreText;
         [SerializeField] private Text magnetCount;
         [SerializeField] private Text slowCount;
         [SerializeField] private Text bombCount;
-
 
         [Space(10)] [Header("Shop UI")] [SerializeField]
         private GameObject shopMenu;
@@ -49,32 +61,32 @@ namespace Managers
         [Space(10)] [Header("Pause UI")] [SerializeField]
         private GameObject pauseMenu;
 
+        [SerializeField] private GameObject countdown;
+
         [Space(10)] [Header("Temp UI")] public GameObject tempSettings;
         public GameObject tempPanel;
 
-        [Space(10)] [Header("Rankings")] [SerializeField]
-        private GameObject rankingsScreen;
-
-        [Space(10)] [Header("Boosters")] [SerializeField]
-        private Button magnetBooster;
-
-        [SerializeField] private Button slowBooster;
-        [SerializeField] private Button bombBooster;
-
-
-        [Space(10)] [SerializeField] private Text highscoreText;
-
+        [Space(10)] [Header("Game UI")] public Button magnet;
+        public Button slow;
+        public Button bomb;
         [SerializeField] private Text scoreText;
-        public ParticleSystem explotion;
+        [HideInInspector] public GameObject game;
+
+        #endregion
 
 
-        public GameObject game;
+        [HideInInspector] public ParticleSystem explosion;
+
+        #region UnityActions
 
         public UnityAction<GameObject> CreateGameWindow;
         public UnityAction DestroyGame;
-        public UnityAction Magnet;
-        public UnityAction Slow;
-        public UnityAction Bomb;
+        public UnityAction OnMagnetUse;
+        public UnityAction OnSlowUse;
+        public UnityAction OnBombUse;
+
+        #endregion
+
 
         #region UnityLifeCycle
 
@@ -98,26 +110,7 @@ namespace Managers
 
         public void OnPlayButtonClick()
         {
-            GameData.Instance().gameState = State.PLAYING;
-            mainMenu.SetActive(false);
-            settingsButton.SetActive(false);
-            shopButton.SetActive(false);
-            pauseButton.SetActive(true);
-            try
-            {
-                CreateGameWindow(frame);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                Debug.LogError("Create Game Windows probabliy null");
-            }
-
-            if (game == null) throw new Exception("uiManager game is null");
-            game.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
-            background.sprite = gameBg;
-            ParticleSystem.MainModule main = explotion.main;
-            main.startColor = GameData.Instance().Color;
+            CreateGame();
         }
 
         public void OnShareButtonClick()
@@ -158,16 +151,7 @@ namespace Managers
 
         public void OnResumeButtonClick()
         {
-            Sequence sequence = DOTween.Sequence();
-            sequence.PrependInterval(3).OnComplete(() =>
-            {
-                DOTween.TogglePauseAll();
-                GameData.Instance().gameState = State.PLAYING;
-                game.SetActive(true);
-                pauseMenu.SetActive(false);
-                pauseButton.SetActive(true);
-                sequence.Kill();
-            });
+            ResumeGame();
         }
 
         public void OnShopButtonClick()
@@ -184,6 +168,28 @@ namespace Managers
         public void OnBackButtonClick()
         {
             StateChange();
+        }
+
+        public void OnExitButtonClick()
+        {
+            ExitGame();
+        }
+
+        public void OnRestartButtonClick()
+        {
+            GameData.Instance().gameState = State.RESTART;
+
+            pauseButton.SetActive(true);
+            pauseMenu.SetActive(false);
+
+            CreateGame();
+            foreach (Transform child in frame.transform)
+            {
+                if (child.GetComponent<GameObject>() != null && !child.gameObject.activeInHierarchy)
+                {
+                    Destroy(child);
+                }
+            }
         }
 
 
@@ -212,11 +218,10 @@ namespace Managers
 
         private void StateChange()
         {
-            print(GameData.Instance().gameState);
             switch (GameData.Instance().gameState)
             {
                 case State.PAUSE:
-                    OnResumeButtonClick();
+                    ResumeGame();
                     break;
                 case State.SETTINGS:
                     settingsMenu.SetActive(false);
@@ -236,23 +241,26 @@ namespace Managers
                     StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
                     break;
                 case State.PLAYING:
-                    DestroyGame();
-                    mainMenu.SetActive(true);
-                    background.sprite = bg;
-                    pauseButton.SetActive(false);
-                    settingsButton.SetActive(true);
-                    shopButton.SetActive(true);
-                    GameData.Instance().gameState = State.MAIN_MENU;
+                    ExitGame();
                     break;
                 case State.RANKINGS:
                     rankingsScreen.SetActive(false);
                     mainMenu.SetActive(true);
                     shopButton.SetActive(true);
                     settingsButton.SetActive(true);
+                    backButton.SetActive(false);
                     GameData.Instance().gameState = State.MAIN_MENU;
+                    break;
+                case State.EXIT_PLAYING:
+                    break;
+                case State.RESTART:
+                    break;
+                default:
+                case State.MAIN_MENU:
                     break;
             }
         }
+
 
         public void UpdateUI()
         {
@@ -300,6 +308,13 @@ namespace Managers
                 : "+";
         }
 
+        public void UpdateGameUI()
+        {
+            slow.GetComponentInChildren<Text>().text = GameData.Instance().slowBoosterCount + "";
+            magnet.GetComponentInChildren<Text>().text = GameData.Instance().magnetBoosterCount + "";
+            bomb.GetComponentInChildren<Text>().text = GameData.Instance().bombBoosterCount + "";
+        }
+
         #endregion
 
 
@@ -345,7 +360,7 @@ namespace Managers
                     sequence.TogglePause();
                     handle.CrossFadeAlpha(0f, 0.01f, true);
                 })
-                .AppendCallback(() => explotion.Play()).AppendInterval(2f).OnComplete(() =>
+                .AppendCallback(() => explosion.Play()).AppendInterval(2f).OnComplete(() =>
                 {
                     Destroy(game);
                     GameData.Instance().gameState = State.MAIN_MENU;
@@ -358,6 +373,53 @@ namespace Managers
                 });
         }
 
+        void CreateGame()
+        {
+            GameData.Instance().gameState = State.PLAYING;
+            mainMenu.SetActive(false);
+            settingsButton.SetActive(false);
+            shopButton.SetActive(false);
+            pauseButton.SetActive(true);
+
+            CreateGameWindow(frame);
+
+            game.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+            background.sprite = gameBg;
+            ParticleSystem.MainModule main = explosion.main;
+            main.startColor = GameData.Instance().Color;
+        }
+
+        void ResumeGame()
+        {
+            Sequence sequence = DOTween.Sequence();
+            sequence.PrependInterval(3.25f);
+            sequence.PrependCallback(() =>
+            {
+                pauseMenu.SetActive(false);
+                Instantiate(countdown, frame.transform);
+            });
+            sequence.OnComplete(() =>
+            {
+                DOTween.TogglePauseAll();
+                GameData.Instance().gameState = State.PLAYING;
+                game.SetActive(true);
+                pauseButton.SetActive(true);
+                sequence.Kill();
+            });
+        }
+
+        private void ExitGame()
+        {
+            pauseMenu.SetActive(false);
+            pauseButton.SetActive(false);
+            mainMenu.SetActive(true);
+            background.sprite = bg;
+            settingsButton.SetActive(true);
+            shopButton.SetActive(true);
+            DestroyGame();
+            GameData.Instance().gameState = State.MAIN_MENU;
+        }
+
         //temp
         public void temp()
         {
@@ -365,11 +427,13 @@ namespace Managers
             tempPanel.SetActive(true);
         }
 
+        #region Powers
+
         public void MagnetPower()
         {
             if (GameData.Instance().magnetBoosterCount == 0) return;
             GameData.Instance().magnetBoosterCount--;
-            Magnet();
+            OnMagnetUse();
             UpdateUI();
         }
 
@@ -377,7 +441,7 @@ namespace Managers
         {
             if (GameData.Instance().slowBoosterCount == 0) return;
             GameData.Instance().slowBoosterCount--;
-            Slow();
+            OnSlowUse();
             UpdateUI();
         }
 
@@ -385,16 +449,10 @@ namespace Managers
         {
             if (GameData.Instance().bombBoosterCount == 0) return;
             GameData.Instance().bombBoosterCount--;
-            Bomb();
+            OnBombUse();
             UpdateUI();
         }
 
-        public UnityAction UpdateGameUI(Text magnet, Text slow, Text bomb)
-        {
-            magnet.text = GameData.Instance().magnetBoosterCount + "";
-            slow.text = GameData.Instance().slowBoosterCount + "";
-            bomb.text = GameData.Instance().bombBoosterCount + "";
-            return null;
-        }
+        #endregion
     }
 }

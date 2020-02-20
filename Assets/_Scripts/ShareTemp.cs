@@ -8,13 +8,13 @@ public class ShareTemp : MonoBehaviour
 {
     [SerializeField] private Text username;
     [SerializeField] private Text score;
-
+    [SerializeField] private Button backButton;
 
     void Start()
     {
         SetUsername();
         SetScore();
-
+        backButton.onClick.AddListener(DeactivateScreen);
         StartCoroutine(SaveScreenshot());
     }
 
@@ -26,7 +26,12 @@ public class ShareTemp : MonoBehaviour
     private void Update()
     {
         if (Input.GetKey(KeyCode.Escape))
-            gameObject.SetActive(false);
+            DeactivateScreen();
+    }
+
+    private void DeactivateScreen()
+    {
+        gameObject.SetActive(false);
     }
 
 
@@ -51,5 +56,6 @@ public class ShareTemp : MonoBehaviour
         string path = Sharing.SaveScreenshot("hs");
         Debug.Log(path);
         Sharing.ShareImage(path, "Can you beat me?");
+        backButton.gameObject.SetActive(true);
     }
 }

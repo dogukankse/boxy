@@ -1,4 +1,5 @@
 using System;
+using _Scripts.Managers;
 using DG.Tweening;
 using EasyMobile;
 using UnityEngine;
@@ -14,7 +15,8 @@ namespace Managers
         MAIN_MENU,
         SETTINGS,
         SHOP,
-        RANKINGS
+        RANKINGS,
+        RESTART
     }
 
     public class AppManager : MonoBehaviour
@@ -47,7 +49,7 @@ namespace Managers
             LanguageManager.Instance().SetLanguage(GameData.Instance().language);
 
             //dotween settings
-            DOTween.logBehaviour = LogBehaviour.Verbose;
+            DOTween.logBehaviour = LogBehaviour.Default;
 
             _gameCount = 0;
 
@@ -59,22 +61,19 @@ namespace Managers
             AdsManager.Instance().OnRewardedVideoFinished = uiManager.UpdateUI;
         }
 
-        private void Update()
-        {
-            if (GameData.Instance().gameState == State.MAIN_MENU)
-            {
-                if (_gameCount == videoAdLimit)
-                {
-                    AdsManager.Instance().ShowVideo();
-                    _gameCount = 0;
-                }
-            }
-        }
-
         private void OnEnable()
         {
             GameServices.UserLoginSucceeded += OnUserLoginSucceeded;
             GameServices.UserLoginFailed += OnUserLoginFailed;
+        }
+
+        private void Update()
+        {
+            if (_gameCount == videoAdLimit)
+            {
+                AdsManager.Instance().ShowVideo();
+                _gameCount = 0;
+            }
         }
 
         private void OnDisable()
@@ -109,9 +108,7 @@ namespace Managers
 
         private void CreateGame(GameObject frame)
         {
-            print("before createGame: " + _gameCount);
             _gameCount += 1;
-            Debug.Log("CreateGame girdi");
             game = Instantiate(gameScreen, frame.transform, false);
             StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
             gameManager = game.GetComponentInChildren<GameManager>();
@@ -120,13 +117,17 @@ namespace Managers
             gameManager.playerCollider.GameOver = uiManager.GameOver;
 
 
-            gameManager.UpdeteUI += uiManager.UpdateUI;
-            gameManager.UpdeteUI += uiManager.UpdateGameUI(gameManager.magnet.GetComponentInChildren<Text>(),
-                gameManager.slow.GetComponentInChildren<Text>(), gameManager.bomb.GetComponentInChildren<Text>());
+            gameManager.UpdateUI = uiManager.UpdateUI;
+            gameManager.UpdateGameUI = uiManager.UpdateGameUI;
 
-            uiManager.Magnet = gameManager.Magnet;
-            uiManager.Slow = gameManager.Slow;
-            uiManager.Bomb = gameManager.Bomb;
+            uiManager.OnMagnetUse = gameManager.Magnet;
+            uiManager.OnSlowUse = gameManager.Slow;
+            uiManager.OnBombUse = gameManager.Bomb;
+
+            uiManager.magnet = gameManager.magnet;
+            uiManager.slow = gameManager.slow;
+            uiManager.bomb = gameManager.bomb;
+            
 
             gameManager.magnet.onClick.AddListener(uiManager.MagnetPower);
             gameManager.slow.onClick.AddListener(uiManager.SlowPower);
@@ -134,9 +135,7 @@ namespace Managers
 
 
             uiManager.game = game;
-            uiManager.explotion = game.GetComponentInChildren<ParticleSystem>();
-
-            print("after createGame: " + _gameCount);
+            uiManager.explosion = game.GetComponentInChildren<ParticleSystem>();
         }
 
         private void DestroyGame()
