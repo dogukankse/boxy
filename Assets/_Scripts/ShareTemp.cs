@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.IO;
-using EasyMobile;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,10 +36,10 @@ public class ShareTemp : MonoBehaviour
 
     private void SetUsername()
     {
-        if (GameServices.IsInitialized())
-            username.text = GameServices.LocalUser.userName;
-        else
-            username.text = GameData.Instance().username ?? "Boxy";
+        // if (GameServices.IsInitialized())
+        //     username.text = GameServices.LocalUser.userName;
+        // else
+        //     username.text = GameData.Instance().username ?? "Boxy";
     }
 
     private void SetScore()
@@ -53,9 +52,9 @@ public class ShareTemp : MonoBehaviour
         yield return new WaitForEndOfFrame();
 
 
-        string path = Sharing.SaveScreenshot("hs");
-        Debug.Log(path);
-        Sharing.ShareImage(path, "Can you beat me?");
-        backButton.gameObject.SetActive(true);
+        // string path = Sharing.SaveScreenshot("hs");
+        // Debug.Log(path);
+        // Sharing.ShareImage(path, "Can you beat me?");
+        // backButton.gameObject.SetActive(true);
     }
 }

@@ -1,9 +1,6 @@
-using System;
 using _Scripts.Managers;
 using DG.Tweening;
-using EasyMobile;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Managers
 {
@@ -28,7 +25,7 @@ namespace Managers
 
         private State gameState;
         private GameObject game;
-        private SavedGame save;
+        // private SavedGame save;
 
         private int _gameCount;
 
@@ -37,13 +34,9 @@ namespace Managers
 
         private void Awake()
         {
-            //easymobile init
-            if (!RuntimeManager.IsInitialized())
-                RuntimeManager.Init();
-
             //for google play services
-            if (!GameServices.IsInitialized())
-                GameServices.Init();
+            // if (!GameServices.IsInitialized())
+            //     GameServices.Init();
 
             //default or last language
             LanguageManager.Instance().SetLanguage(GameData.Instance().language);
@@ -58,33 +51,33 @@ namespace Managers
             uiManager.SetTexts();
             uiManager.CreateGameWindow = CreateGame;
             uiManager.DestroyGame = DestroyGame;
-            AdsManager.Instance().OnRewardedVideoFinished = uiManager.UpdateUI;
+            // AdsManager.Instance().OnRewardedVideoFinished = uiManager.UpdateUI;
         }
 
         private void OnEnable()
         {
-            GameServices.UserLoginSucceeded += OnUserLoginSucceeded;
-            GameServices.UserLoginFailed += OnUserLoginFailed;
+            // GameServices.UserLoginSucceeded += OnUserLoginSucceeded;
+            // GameServices.UserLoginFailed += OnUserLoginFailed;
         }
 
         private void Update()
         {
-            if (_gameCount == videoAdLimit)
-            {
-                AdsManager.Instance().ShowVideo();
-                _gameCount = 0;
-            }
+            // if (_gameCount == videoAdLimit)
+            // {
+            //     AdsManager.Instance().ShowVideo();
+            //     _gameCount = 0;
+            // }
         }
 
         private void OnDisable()
         {
-            GameServices.UserLoginSucceeded -= OnUserLoginSucceeded;
-            GameServices.UserLoginFailed -= OnUserLoginFailed;
+            // GameServices.UserLoginSucceeded -= OnUserLoginSucceeded;
+            // GameServices.UserLoginFailed -= OnUserLoginFailed;
         }
 
         private void OnDestroy()
         {
-            SaveManager.Save();
+            // SaveManager.Save();
         }
 
         #endregion
@@ -110,7 +103,7 @@ namespace Managers
         {
             _gameCount += 1;
             game = Instantiate(gameScreen, frame.transform, false);
-            StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
+            // StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
             gameManager = game.GetComponentInChildren<GameManager>();
             uiManager.SetScoreText(gameManager.GetScoreText());
             gameManager.playerCollider.UpdateScore = uiManager.SetScore;
@@ -127,7 +120,7 @@ namespace Managers
             uiManager.magnet = gameManager.magnet;
             uiManager.slow = gameManager.slow;
             uiManager.bomb = gameManager.bomb;
-            
+
 
             gameManager.magnet.onClick.AddListener(uiManager.MagnetPower);
             gameManager.slow.onClick.AddListener(uiManager.SlowPower);

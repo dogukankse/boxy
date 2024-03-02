@@ -11,8 +11,8 @@ public class GameData
 
     public static GameData Instance()
     {
-        return instance ?? (instance = SaveManager.IsSaveExists() ? SaveManager.Load() : new GameData());
-        //return instance ?? (instance = new GameData());
+        // return instance ?? (instance = SaveManager.IsSaveExists() ? SaveManager.Load() : new GameData());
+        return instance ?? (instance = new GameData());
     }
 
     public static void SetGameData(GameData gameData)

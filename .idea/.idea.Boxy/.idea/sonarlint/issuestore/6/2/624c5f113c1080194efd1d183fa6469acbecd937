@@ -1,0 +1,4 @@
+
+~csharpsquid:S101"]Rename class 'GPGSUpgrader' to match pascal case naming rules, consider using 'GpgsUpgrader'.(“¡Ø˜úÿÿÿÿ
+qcsharpsquid:S1118"OAdd a 'protected' constructor or the 'static' keyword to the class declaration.(“¡Ø˜úÿÿÿÿ
+lcsharpsquid:S3963""JInitialize all 'static fields' inline and remove the 'static constructor'.(éÍß§þÿÿÿÿ

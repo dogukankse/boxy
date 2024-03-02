@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using _Scripts;
 using _Scripts.Data;
-using Data;
 using DG.Tweening;
-using EasyMobile;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -144,8 +140,8 @@ namespace Managers
             DOTween.Kill(callID);
             tweenSequence.Kill();
             GameData.Instance().lastScore = playerCollider.Score;
-            if (GameServices.IsInitialized())
-                GameServices.ReportScore(GameData.Instance().lastScore, EM_GameServicesConstants.Leaderboard_Rakings);
+            // if (GameServices.IsInitialized())
+            //     GameServices.ReportScore(GameData.Instance().lastScore, EM_GameServicesConstants.Leaderboard_Rakings);
             if (GameData.Instance().lastScore > GameData.Instance().highScore)
                 GameData.Instance().highScore = GameData.Instance().lastScore;
             UpdateUI();

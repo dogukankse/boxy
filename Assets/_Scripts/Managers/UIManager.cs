@@ -1,13 +1,10 @@
-﻿using System;
-using _Scripts;
+﻿using _Scripts;
 using _Scripts.Data;
 using _Scripts.Managers;
 using Data;
 using DG.Tweening;
-using EasyMobile;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 
 namespace Managers
@@ -34,18 +31,18 @@ namespace Managers
         [Space(10)] [Header("MainMenu UI")] [SerializeField]
         private GameObject canvas;
 
-        [SerializeField] private Text username;
+        // [SerializeField] private Text username;
         [SerializeField] private GameObject mainMenu;
         [SerializeField] private GameObject settingsButton;
-        [SerializeField] private GameObject shopButton;
+        // [SerializeField] private GameObject shopButton;
         [SerializeField] private GameObject pauseButton;
         [SerializeField] private GameObject backButton;
         [SerializeField] private GameObject frame;
-        [SerializeField] private Text lastScoreText;
-        [SerializeField] private Text rankingText;
-        [SerializeField] private Text lastScore;
-        [SerializeField] private Text highScore;
-        [SerializeField] private Text highscoreText;
+        // [SerializeField] private Text lastScoreText;
+        // [SerializeField] private Text rankingText;
+        // [SerializeField] private Text lastScore;
+        // [SerializeField] private Text highScore;
+        // [SerializeField] private Text highscoreText;
         [SerializeField] private Text magnetCount;
         [SerializeField] private Text slowCount;
         [SerializeField] private Text bombCount;
@@ -123,8 +120,8 @@ namespace Managers
 
         public void OnRankingButtonClick()
         {
-            if (GameServices.IsInitialized())
-                GameServices.ShowLeaderboardUI();
+            // if (GameServices.IsInitialized())
+            //     GameServices.ShowLeaderboardUI();
         }
 
         public void OnSettingsButtonClick()
@@ -133,7 +130,7 @@ namespace Managers
             mainMenu.SetActive(false);
             settingsMenu.SetActive(true);
             settingsButton.SetActive(false);
-            shopButton.SetActive(false);
+            // shopButton.SetActive(false);
             backButton.SetActive(true);
         }
 
@@ -160,9 +157,9 @@ namespace Managers
             mainMenu.SetActive(false);
             shopMenu.SetActive(true);
             settingsButton.SetActive(false);
-            shopButton.SetActive(false);
+            // shopButton.SetActive(false);
             backButton.SetActive(true);
-            AdsManager.Instance().HideBanner();
+            // AdsManager.Instance().HideBanner();
         }
 
         public void OnBackButtonClick()
@@ -196,20 +193,20 @@ namespace Managers
         public void OnBombCountButtonClick()
         {
             if (GameData.Instance().bombBoosterCount != 0) return;
-            AdsManager.Instance().ShowRewardedVideo(1);
+            // AdsManager.Instance().ShowRewardedVideo(1);
         }
 
         public void OnSlowCountButtonClick()
         {
             if (GameData.Instance().slowBoosterCount != 0) return;
-            AdsManager.Instance().ShowRewardedVideo(2);
+            // AdsManager.Instance().ShowRewardedVideo(2);
         }
 
 
         public void OnMagnetCountButtonClick()
         {
             if (GameData.Instance().magnetBoosterCount != 0) return;
-            AdsManager.Instance().ShowRewardedVideo(3);
+            // AdsManager.Instance().ShowRewardedVideo(3);
         }
 
         #endregion
@@ -227,7 +224,7 @@ namespace Managers
                     settingsMenu.SetActive(false);
                     mainMenu.SetActive(true);
                     backButton.SetActive(false);
-                    shopButton.SetActive(true);
+                    // shopButton.SetActive(true);
                     settingsButton.SetActive(true);
                     GameData.Instance().gameState = State.MAIN_MENU;
                     break;
@@ -235,10 +232,10 @@ namespace Managers
                     shopMenu.SetActive(false);
                     mainMenu.SetActive(true);
                     backButton.SetActive(false);
-                    shopButton.SetActive(true);
+                    // shopButton.SetActive(true);
                     settingsButton.SetActive(true);
                     GameData.Instance().gameState = State.MAIN_MENU;
-                    StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
+                    // StartCoroutine(AdsManager.Instance().ShowBannerWhenReady());
                     break;
                 case State.PLAYING:
                     ExitGame();
@@ -246,7 +243,7 @@ namespace Managers
                 case State.RANKINGS:
                     rankingsScreen.SetActive(false);
                     mainMenu.SetActive(true);
-                    shopButton.SetActive(true);
+                    // shopButton.SetActive(true);
                     settingsButton.SetActive(true);
                     backButton.SetActive(false);
                     GameData.Instance().gameState = State.MAIN_MENU;
@@ -264,48 +261,48 @@ namespace Managers
 
         public void UpdateUI()
         {
-            print("updateUI");
-            if (GameServices.IsInitialized())
-            {
-                username.text = GameServices.LocalUser.userName;
-                GameData.Instance().username = GameServices.LocalUser.userName;
-                GameServices.LoadLocalUserScore(EM_GameServicesConstants.Leaderboard_Rakings,
-                    (string leaderboardName, IScore score) =>
-                    {
-                        if (score != null)
-                        {
-                            if (GameData.Instance().highScore > score.value)
-                            {
-                                highScore.text = GameData.Instance().highScore + "";
-                            }
-                            else
-                            {
-                                highScore.text = score.value + "";
-                                GameData.Instance().highScore = (int) score.value;
-                            }
-
-                            Debug.Log("Score: " + score.value + "leaderboard: " + leaderboardName);
-                        }
-                        else
-                            highScore.text = "0";
-                    });
-            }
-            else
-            {
-                highScore.text = "" + GameData.Instance().highScore;
-                username.text = GameData.Instance().username ?? "Boxy";
-            }
-
-            lastScore.text = "" + GameData.Instance().lastScore;
-            magnetCount.text = (GameData.Instance().magnetBoosterCount > 0)
-                ? "" + GameData.Instance().magnetBoosterCount
-                : "+";
-            slowCount.text = (GameData.Instance().slowBoosterCount > 0)
-                ? "" + GameData.Instance().slowBoosterCount
-                : "+";
-            bombCount.text = (GameData.Instance().bombBoosterCount > 0)
-                ? "" + GameData.Instance().bombBoosterCount
-                : "+";
+            // print("updateUI");
+            // if (GameServices.IsInitialized())
+            // {
+            //     username.text = GameServices.LocalUser.userName;
+            //     GameData.Instance().username = GameServices.LocalUser.userName;
+            //     GameServices.LoadLocalUserScore(EM_GameServicesConstants.Leaderboard_Rakings,
+            //         (string leaderboardName, IScore score) =>
+            //         {
+            //             if (score != null)
+            //             {
+            //                 if (GameData.Instance().highScore > score.value)
+            //                 {
+            //                     highScore.text = GameData.Instance().highScore + "";
+            //                 }
+            //                 else
+            //                 {
+            //                     highScore.text = score.value + "";
+            //                     GameData.Instance().highScore = (int)score.value;
+            //                 }
+            //
+            //                 Debug.Log("Score: " + score.value + "leaderboard: " + leaderboardName);
+            //             }
+            //             else
+            //                 highScore.text = "0";
+            //         });
+            // }
+            // else
+            // {
+            //     highScore.text = "" + GameData.Instance().highScore;
+            //     username.text = GameData.Instance().username ?? "Boxy";
+            // }
+            //
+            // lastScore.text = "" + GameData.Instance().lastScore;
+            // magnetCount.text = (GameData.Instance().magnetBoosterCount > 0)
+            //     ? "" + GameData.Instance().magnetBoosterCount
+            //     : "+";
+            // slowCount.text = (GameData.Instance().slowBoosterCount > 0)
+            //     ? "" + GameData.Instance().slowBoosterCount
+            //     : "+";
+            // bombCount.text = (GameData.Instance().bombBoosterCount > 0)
+            //     ? "" + GameData.Instance().bombBoosterCount
+            //     : "+";
         }
 
         public void UpdateGameUI()
@@ -328,9 +325,9 @@ namespace Managers
         public void SetTexts()
         {
             LanguageManager manager = LanguageManager.Instance();
-            highscoreText.text = manager.getString(StringData.highscore);
-            lastScoreText.text = manager.getString(StringData.lastScore);
-            rankingText.text = manager.getString(StringData.ranking);
+            // highscoreText.text = manager.getString(StringData.highscore);
+            // lastScoreText.text = manager.getString(StringData.lastScore);
+            // rankingText.text = manager.getString(StringData.ranking);
         }
 
         public void SetScoreText(Text scoreText)
@@ -366,7 +363,7 @@ namespace Managers
                     GameData.Instance().gameState = State.MAIN_MENU;
                     mainMenu.SetActive(true);
                     settingsButton.SetActive(true);
-                    shopButton.SetActive(true);
+                    // shopButton.SetActive(true);
                     pauseButton.SetActive(false);
                     sequence.Kill();
                     background.sprite = bg;
@@ -378,7 +375,7 @@ namespace Managers
             GameData.Instance().gameState = State.PLAYING;
             mainMenu.SetActive(false);
             settingsButton.SetActive(false);
-            shopButton.SetActive(false);
+            // shopButton.SetActive(false);
             pauseButton.SetActive(true);
 
             CreateGameWindow(frame);
@@ -415,7 +412,7 @@ namespace Managers
             mainMenu.SetActive(true);
             background.sprite = bg;
             settingsButton.SetActive(true);
-            shopButton.SetActive(true);
+            // shopButton.SetActive(true);
             DestroyGame();
             GameData.Instance().gameState = State.MAIN_MENU;
         }

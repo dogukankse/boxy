@@ -1,0 +1,6 @@
+
+…csharpsquid:S101"iRename class 'GPGSAndroidSetupUI' to match pascal case naming rules, consider using 'GpgsAndroidSetupUi'.(Ç•±
+ucsharpsquid:S3776š"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(ú½Ò´ûÿÿÿÿ
+Rcsharpsquid:S1066¯"/Merge this if statement with the enclosing one.(èÿ’“øÿÿÿÿ
+Rcsharpsquid:S1066ú"/Merge this if statement with the enclosing one.(ò­ßöùÿÿÿÿ
+Lcsharpsquid:S1066®"/Merge this if statement with the enclosing one.(Õù—%
